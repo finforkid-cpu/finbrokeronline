@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สมัครประกันภัยโรคสุดฮิต FIN FOR KIDS PLUS | FIN Insurance Broker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Anuphan:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --fin-red:#E2222D;
+  --fin-red-dark:#B5121C;
+  --fin-red-soft:#FBE9EB;
+  --navy:#1B1464;
+  --navy-soft:#EDECF6;
+  --ink:#2A2D3A;
+  --grey:#5A5F6E;
+  --line:#E4E6ED;
+  --bg:#F6F7FA;
+  --card:#FFFFFF;
+  --ok:#1E9E5A;
+  --radius:16px;
+  --shadow:0 6px 24px rgba(27,20,100,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Anuphan',sans-serif;background:var(--bg);color:var(--ink);font-size:16px;line-height:1.6}
+h1,h2,h3,h4,.kanit{font-family:'Kanit',sans-serif}
+img{max-width:100%}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:16px}
+
+/* ===== Header ===== */
+.topbar{background:var(--card);border-bottom:4px solid var(--fin-red);padding:14px 20px;display:flex;align-items:center;gap:14px;justify-content:center}
+.fin-logo{font-family:'Kanit';font-weight:700;font-size:26px;color:var(--fin-red);line-height:1;letter-spacing:.5px}
+.fin-logo small{display:block;font-size:10px;color:var(--navy);font-weight:600;letter-spacing:1.5px}
+.topbar .divider{width:1px;height:34px;background:var(--line)}
+.topbar .product{font-family:'Kanit';color:var(--navy);font-weight:600;font-size:15px;line-height:1.3}
+.topbar .product b{color:var(--fin-red)}
+
+/* ===== Date/time bar ===== */
+.datebar{background:var(--navy-soft);color:var(--navy);display:flex;align-items:center;justify-content:center;gap:8px 18px;flex-wrap:wrap;padding:7px 14px;font-size:13.5px;font-weight:500}
+.datebar .clock{font-family:'Kanit';font-weight:600;color:var(--fin-red);font-variant-numeric:tabular-nums;letter-spacing:.5px}
+
+/* ===== Stepper ===== */
+.stepper{max-width:760px;margin:26px auto 8px;display:flex;align-items:flex-start;justify-content:space-between;padding:0 24px;position:relative}
+.step{display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;position:relative;z-index:1}
+.step .dot{width:38px;height:38px;border-radius:50%;background:#fff;border:2px solid var(--line);color:var(--grey);display:flex;align-items:center;justify-content:center;font-family:'Kanit';font-weight:600;transition:.25s}
+.step .lbl{font-size:12.5px;color:var(--grey);text-align:center;font-weight:500}
+.step.active .dot{background:var(--fin-red);border-color:var(--fin-red);color:#fff;box-shadow:0 0 0 6px var(--fin-red-soft)}
+.step.active .lbl{color:var(--fin-red);font-weight:600}
+.step.done .dot{background:var(--navy);border-color:var(--navy);color:#fff}
+.step.done .lbl{color:var(--navy)}
+.step-line{position:absolute;top:19px;left:60px;right:60px;height:2px;background:var(--line);z-index:0}
+
+/* ===== Layout ===== */
+.wrap{max-width:760px;margin:0 auto;padding:14px 16px 90px}
+.panel{display:none;animation:fade .3s ease}
+.panel.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:16px}
+.h-eyebrow{display:inline-block;background:var(--fin-red-soft);color:var(--fin-red);font-family:'Kanit';font-weight:600;font-size:13px;padding:3px 12px;border-radius:99px;margin-bottom:8px}
+.h-title{font-size:22px;color:var(--navy);font-weight:600;margin-bottom:4px}
+.h-sub{color:var(--grey);font-size:14px;margin-bottom:16px}
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--grey);font-size:14px;background:none;border:none;margin:6px 0 10px;padding:4px 2px}
+.back-link:hover{color:var(--fin-red)}
+
+/* ===== Choice cards ===== */
+.choice-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px}
+.choice{border:2px solid var(--line);border-radius:14px;padding:16px;background:#fff;text-align:center;transition:.2s;position:relative}
+.choice:hover{border-color:var(--fin-red);transform:translateY(-2px)}
+.choice.selected{border-color:var(--fin-red);background:var(--fin-red-soft)}
+.choice .ic{font-size:30px;line-height:1;margin-bottom:8px}
+.choice .t{font-family:'Kanit';font-weight:600;color:var(--navy);font-size:16px}
+.choice .d{font-size:13px;color:var(--grey)}
+.choice .tag{display:inline-block;margin-top:8px;font-size:12px;background:var(--navy-soft);color:var(--navy);border-radius:99px;padding:2px 10px;font-weight:600}
+
+.plan-card{border:2px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;transition:.2s;display:flex;flex-direction:column}
+.plan-card:hover{border-color:var(--fin-red);transform:translateY(-2px)}
+.plan-card.selected{border-color:var(--fin-red);box-shadow:0 0 0 4px var(--fin-red-soft)}
+.plan-head{background:var(--navy);color:#fff;font-family:'Kanit';font-weight:600;text-align:center;padding:10px;font-size:15px}
+.plan-card.hot .plan-head{background:var(--fin-red)}
+.plan-body{padding:14px;text-align:center;flex:1;display:flex;flex-direction:column;gap:6px}
+.plan-price{font-family:'Kanit';font-weight:700;color:var(--fin-red);font-size:26px;line-height:1.1}
+.plan-price small{font-size:13px;color:var(--grey);font-weight:500;font-family:'Anuphan'}
+.plan-feat{font-size:13px;color:var(--grey);text-align:left;margin:4px auto 0}
+.plan-feat li{list-style:none;padding-left:20px;position:relative;margin-bottom:2px}
+.plan-feat li::before{content:"✔";color:var(--fin-red);position:absolute;left:0;font-weight:700}
+.hot-badge{position:absolute;top:-10px;right:10px;background:var(--fin-red);color:#fff;font-size:11px;font-family:'Kanit';font-weight:600;padding:2px 10px;border-radius:99px}
+
+/* ===== Buttons ===== */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;border-radius:12px;font-family:'Kanit';font-weight:600;font-size:16px;padding:13px 24px;transition:.2s;width:100%}
+.btn-red{background:var(--fin-red);color:#fff}
+.btn-red:hover{background:var(--fin-red-dark)}
+.btn-navy{background:var(--navy);color:#fff}
+.btn-outline{background:#fff;color:var(--fin-red);border:2px solid var(--fin-red)}
+.btn:disabled{background:#C9CBD6;color:#fff;cursor:not-allowed}
+.btn-sm{width:auto;padding:9px 18px;font-size:14px}
+
+/* ===== Coverage table ===== */
+.cov-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.cov-table th{background:var(--navy);color:#fff;font-family:'Kanit';font-weight:600;padding:10px 8px;font-size:13px}
+.cov-table th.sel-col{background:var(--fin-red)}
+.cov-table td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top}
+.cov-table td.num{text-align:center;font-family:'Kanit';font-weight:600;color:var(--navy);white-space:nowrap}
+.cov-table td.num.sel-col{background:var(--fin-red-soft);color:var(--fin-red)}
+.cov-table .sec td{background:var(--navy-soft);color:var(--navy);font-family:'Kanit';font-weight:600;font-size:13px}
+.cov-table .pickrow td{padding:12px 8px;border-bottom:none}
+.table-scroll{overflow-x:auto;margin:0 -6px}
+.disease-list{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px}
+.disease-list .dz{display:flex;align-items:center;gap:8px;font-size:13.5px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:8px 10px}
+.disease-list .dz .ck{color:var(--fin-red);font-weight:700}
+.disease-list .dz.off{opacity:.38}
+.disease-list .dz.off .ck{color:#aaa}
+.note-red{background:var(--fin-red-soft);border-left:4px solid var(--fin-red);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--ink);margin-top:14px}
+.note-navy{background:var(--navy-soft);border-left:4px solid var(--navy);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px}
+
+/* ===== Summary & payment ===== */
+.sum-box{border:2px solid var(--navy);border-radius:14px;overflow:hidden;margin-bottom:16px}
+.sum-head{background:var(--navy);color:#fff;font-family:'Kanit';font-weight:600;padding:10px 16px;display:flex;justify-content:space-between;align-items:center}
+.sum-head .chg{font-size:12px;color:#fff;background:rgba(255,255,255,.18);border:none;border-radius:99px;padding:3px 12px}
+.sum-body{padding:14px 16px;display:grid;gap:6px;font-size:14.5px}
+.sum-row{display:flex;justify-content:space-between;gap:10px}
+.sum-row .k{color:var(--grey)}
+.sum-row .v{font-weight:600;color:var(--navy);text-align:right}
+.sum-total{border-top:2px dashed var(--line);margin-top:6px;padding-top:10px;display:flex;justify-content:space-between;align-items:center}
+.sum-total .v{font-family:'Kanit';font-weight:700;font-size:24px;color:var(--fin-red)}
+
+.pay-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.pay-opt{border:2px solid var(--line);border-radius:12px;padding:12px;text-align:center;background:#fff;transition:.2s}
+.pay-opt:hover{border-color:var(--fin-red)}
+.pay-opt.selected{border-color:var(--fin-red);background:var(--fin-red-soft)}
+.pay-opt .t{font-family:'Kanit';font-weight:600;color:var(--navy)}
+.pay-opt .d{font-size:12px;color:var(--grey)}
+.inst-table{width:100%;border-collapse:collapse;font-size:14px;margin-top:12px}
+.inst-table th{background:var(--fin-red);color:#fff;font-family:'Kanit';font-weight:600;padding:8px;font-size:13px}
+.inst-table td{border-bottom:1px solid var(--line);padding:8px;text-align:center}
+.inst-table td:first-child{text-align:left}
+.inst-table tfoot td{font-family:'Kanit';font-weight:700;color:var(--fin-red);background:var(--fin-red-soft)}
+
+.bank{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin-bottom:8px;background:#fff}
+.bank .logo{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Kanit';font-weight:700;font-size:13px;flex-shrink:0;object-fit:cover}
+.bank .nm{font-size:13px;color:var(--grey)}
+.bank .no{font-family:'Kanit';font-weight:600;font-size:17px;color:var(--navy);letter-spacing:.5px}
+.bank .cp{margin-left:auto;background:var(--navy-soft);color:var(--navy);border:none;border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600}
+.bank .cp:active{background:var(--navy);color:#fff}
+
+.upload{border:2px dashed var(--fin-red);border-radius:12px;background:var(--fin-red-soft);padding:18px;text-align:center;transition:.2s;display:block;cursor:pointer}
+.upload.small{padding:12px}
+.upload:hover{background:#F8DDE0}
+.upload input{display:none}
+.upload .up-t{font-family:'Kanit';font-weight:600;color:var(--fin-red)}
+.upload .up-d{font-size:12.5px;color:var(--grey)}
+.upload.done{border-style:solid;border-color:var(--ok);background:#E8F7EF}
+.upload.done .up-t{color:var(--ok)}
+
+/* ===== Form ===== */
+.form-sec-title{display:flex;align-items:center;gap:10px;font-family:'Kanit';font-weight:600;color:var(--navy);font-size:17px;margin:4px 0 12px}
+.form-sec-title .n{width:26px;height:26px;border-radius:50%;background:var(--fin-red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fgrid .full{grid-column:1/-1}
+.fld label{display:block;font-size:13.5px;font-weight:600;color:var(--ink);margin-bottom:4px}
+.fld label .req{color:var(--fin-red)}
+.fld input,.fld select,.fld textarea{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff;transition:.15s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--fin-red);box-shadow:0 0 0 3px var(--fin-red-soft)}
+.fld .err{display:none;font-size:12px;color:var(--fin-red);margin-top:3px}
+.fld.invalid input,.fld.invalid select{border-color:var(--fin-red)}
+.fld.invalid .err{display:block}
+.fld .hint{font-size:12px;color:var(--grey);margin-top:3px}
+
+/* ===== Thank you ===== */
+.thanks{text-align:center;padding:30px 16px}
+.thanks .big-ck{width:86px;height:86px;border-radius:50%;background:var(--fin-red);color:#fff;font-size:44px;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;box-shadow:0 0 0 12px var(--fin-red-soft)}
+.thanks h2{font-size:26px;color:var(--navy)}
+.ref-box{display:inline-block;background:var(--navy-soft);border-radius:12px;padding:10px 22px;margin:14px 0;font-family:'Kanit'}
+.ref-box .k{font-size:12px;color:var(--grey)}
+.ref-box .v{font-size:20px;font-weight:700;color:var(--navy);letter-spacing:1px}
+.next-steps{max-width:430px;margin:10px auto 0;text-align:left}
+.next-steps .st{display:flex;gap:10px;margin-bottom:10px;font-size:14px}
+.next-steps .st .b{width:22px;height:22px;border-radius:50%;background:var(--fin-red);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-family:'Kanit'}
+.line-btn{background:#06C755;color:#fff}
+.line-btn:hover{background:#05B24C}
+
+/* ===== Footer ribbon (signature CI) ===== */
+.ribbon{position:fixed;bottom:0;left:0;right:0;background:var(--fin-red);color:#fff;font-family:'Kanit';font-weight:600;display:flex;justify-content:space-between;align-items:center;padding:9px 20px;font-size:14.5px;z-index:5;border-radius:22px 22px 0 0}
+.ribbon .web{font-family:'Anuphan';font-weight:500;font-size:12.5px;opacity:.9}
+
+/* ===== Mobile plan carousel ===== */
+.plan-dots{display:none}
+.swipe-hint{display:none}
+@media(max-width:560px){
+  .fgrid{grid-template-columns:1fr}
+  .disease-list{grid-template-columns:1fr}
+  .stepper{padding:0 8px}
+  .step .lbl{font-size:10.5px}
+  .step-line{left:34px;right:34px}
+  .card{padding:16px}
+  #planGrid{display:grid;grid-auto-flow:column;grid-auto-columns:80%;gap:12px;
+    overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+    margin:0 -16px;padding:12px 16px 4px;scrollbar-width:none}
+  #planGrid::-webkit-scrollbar{display:none}
+  #planGrid .plan-card{scroll-snap-align:center}
+  .plan-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+  .plan-dots .pd{width:8px;height:8px;border-radius:99px;background:var(--line);border:none;padding:0;transition:.25s}
+  .plan-dots .pd.on{background:var(--fin-red);width:22px}
+  .swipe-hint{display:block;text-align:center;font-size:12px;color:var(--grey);margin-top:6px}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="fin-logo">FIN<small>INSURANCE&nbsp;BROKER</small></div>
+  <div class="divider"></div>
+  <div class="product">ประกันภัยโรคสุดฮิต<br><b>FIN FOR KIDS PLUS</b> <span style="color:var(--grey);font-size:12px;font-weight:400">by MSIG</span></div>
+</header>
+
+<div class="datebar">
+  <span id="curDate"></span>
+  <span class="clock" id="curTime"></span>
+</div>
+
+<nav class="stepper" aria-label="ขั้นตอนการสมัคร">
+  <div class="step-line"></div>
+  <div class="step" data-step="1"><div class="dot">1</div><div class="lbl">เลือกแผน</div></div>
+  <div class="step" data-step="2"><div class="dot">2</div><div class="lbl">ความคุ้มครอง</div></div>
+  <div class="step" data-step="3"><div class="dot">3</div><div class="lbl">ชำระเงิน</div></div>
+  <div class="step" data-step="4"><div class="dot">4</div><div class="lbl">ข้อมูลผู้สมัคร</div></div>
+  <div class="step" data-step="5"><div class="dot">✓</div><div class="lbl">เสร็จสิ้น</div></div>
+</nav>
+
+<main class="wrap">
+
+<!-- ============ STEP 1 ============ -->
+<section class="panel" id="panel1">
+  <div class="card">
+    <span class="h-eyebrow">ขั้นตอนที่ 1</span>
+    <h2 class="h-title">เลือกช่วงอายุบุตร/หลาน</h2>
+    <p class="h-sub">เบี้ยประกันภัยและโรคที่คุ้มครองจะแตกต่างกันตามช่วงอายุของบุตร/หลาน</p>
+    <div class="choice-grid" id="ageGrid"></div>
+  </div>
+
+  <div class="card" id="planPickCard" style="display:none">
+    <h2 class="h-title" style="font-size:19px">เลือกแผนความคุ้มครอง</h2>
+    <p class="h-sub" id="planPickSub"></p>
+    <div class="choice-grid" id="planGrid"></div>
+    <div class="plan-dots" id="planDots"></div>
+    <div class="swipe-hint">‹ เลื่อนซ้าย-ขวาเพื่อเปรียบเทียบแผน ›</div>
+    <div class="note-navy">💳 ทุกแผนผ่อนชำระได้สูงสุด 6 งวด 0% ไม่มีดอกเบี้ย จ่ายงวดแรกคุ้มครองทันที · ระยะรอคอยเพียง 15 วัน</div>
+  </div>
+</section>
+
+<!-- ============ STEP 2 ============ -->
+<section class="panel" id="panel2">
+  <button class="back-link" onclick="goStep(1)">‹ ย้อนกลับ</button>
+  <div class="card">
+    <span class="h-eyebrow">ขั้นตอนที่ 2</span>
+    <h2 class="h-title">รายละเอียดความคุ้มครองทั้ง 3 แผน</h2>
+    <p class="h-sub">เปรียบเทียบก่อนตัดสินใจ — แตะ "เลือกแผนนี้" ใต้แผนที่ต้องการเพื่อไปขั้นตอนถัดไป</p>
+    <div class="table-scroll">
+      <table class="cov-table" id="covTable"></table>
+    </div>
+    <div class="note-red">🔴 <b>ระยะรอคอย (Waiting Period) 15 วัน</b> สำหรับการเจ็บป่วยตามโรคที่ระบุ นับจากวันเริ่มต้นความคุ้มครอง · OPD คุ้มครองสูงสุด 30 วันต่อปี หรือ 7 ครั้งต่อโรค · การเคลมโรคไข้หวัดใหญ่ ไข้เลือดออก RSV และโรคอื่นๆ ตามที่บริษัทร้องขอ ต้องแนบผลตรวจทางห้องปฏิบัติการ (Lab Report)</div>
+  </div>
+
+  <div class="card">
+    <h3 class="h-title" style="font-size:18px" id="dzTitle">โรคที่ได้รับความคุ้มครอง</h3>
+    <div class="disease-list" id="dzList"></div>
+  </div>
+</section>
+
+<!-- ============ STEP 3 ============ -->
+<section class="panel" id="panel3">
+  <button class="back-link" onclick="goStep(2)">‹ ย้อนกลับ</button>
+
+  <div class="sum-box">
+    <div class="sum-head"><span>สรุปแผนที่คุณเลือก</span><button class="chg" onclick="goStep(1)">เปลี่ยนแผน</button></div>
+    <div class="sum-body" id="sumBody"></div>
+  </div>
+
+  <div class="card">
+    <span class="h-eyebrow">ขั้นตอนที่ 3</span>
+    <h2 class="h-title">เลือกวิธีชำระเงิน</h2>
+    <p class="h-sub">ผ่อนชำระ 0% ไม่มีดอกเบี้ย · จ่ายงวดแรก คุ้มครองทันที</p>
+    <div class="pay-grid" id="payGrid"></div>
+    <div id="payDetail"></div>
+  </div>
+
+  <div class="card" id="bankCard" style="display:none">
+    <h3 class="h-title" style="font-size:18px">ชำระเงินโดยโอนเข้าบัญชีธนาคาร</h3>
+    <p class="h-sub">บจก. ฟิน อินชัวรันส์ โบรคเกอร์ · สาขาเซ็นทรัล พระราม 3</p>
+    <div class="bank"><img class="logo" src="assets/kbank.png" alt="ธนาคารกสิกรไทย"><div><div class="nm">ธนาคารกสิกรไทย</div><div class="no">057-8-40722-7</div></div><button class="cp" onclick="copyAcc('0578407227',this)">คัดลอก</button></div>
+    <div class="bank"><img class="logo" src="assets/scb.png" alt="ธนาคารไทยพาณิชย์"><div><div class="nm">ธนาคารไทยพาณิชย์</div><div class="no">165-2-67459-4</div></div><button class="cp" onclick="copyAcc('1652674594',this)">คัดลอก</button></div>
+    <div class="bank"><img class="logo" src="assets/krungsri.png" alt="ธนาคารกรุงศรีอยุธยา"><div><div class="nm">ธนาคารกรุงศรีอยุธยา</div><div class="no">800-9-30569-7</div></div><button class="cp" onclick="copyAcc('8009305697',this)">คัดลอก</button></div>
+    <div class="note-red">❌ <b>ไม่รับชำระ</b>ผ่านตู้ ATM · เคาน์เตอร์ธนาคาร · เคาน์เตอร์เซอร์วิส 7-ELEVEN — โอนเงินผ่านบัญชีธนาคารเท่านั้น</div>
+    <div style="margin-top:14px">
+      <div class="sum-row" style="margin-bottom:8px"><span class="k">ยอดที่ต้องชำระงวดนี้</span><span class="v kanit" id="payNow" style="color:var(--fin-red);font-size:22px"></span></div>
+      <label class="upload" id="slipUp">
+        <input type="file" accept="image/*,.pdf" onchange="onSlip(this)">
+        <div class="up-t" id="slipT">📎 แนบสลิปการโอนเงิน</div>
+        <div class="up-d" id="slipD">รองรับไฟล์ภาพ หรือ PDF ขนาดไม่เกิน 10 MB</div>
+      </label>
+    </div>
+  </div>
+
+  <button class="btn btn-red" id="toStep4" disabled onclick="goStep(4)">แนบสลิปแล้ว — กรอกข้อมูลผู้สมัคร ›</button>
+</section>
+
+<!-- ============ STEP 4 ============ -->
+<section class="panel" id="panel4">
+  <button class="back-link" onclick="goStep(3)">‹ ย้อนกลับ</button>
+  <div class="card">
+    <span class="h-eyebrow">ขั้นตอนที่ 4</span>
+    <h2 class="h-title">ข้อมูลผู้ขอเอาประกันภัย</h2>
+    <p class="h-sub">ข้อมูลนี้ใช้สำหรับออกกรมธรรม์เท่านั้น และได้รับความคุ้มครองตาม พ.ร.บ. คุ้มครองข้อมูลส่วนบุคคล (PDPA)</p>
+
+    <div class="form-sec-title"><span class="n">1</span>ผู้ปกครอง (ผู้เอาประกันภัยหลัก)</div>
+    <div class="fgrid">
+      <div class="fld"><label>ชื่อ-นามสกุล <span class="req">*</span></label><input id="pName" placeholder="เช่น สมชาย ใจดี"><div class="err">กรุณากรอกชื่อ-นามสกุล</div></div>
+      <div class="fld"><label>วัน/เดือน/ปีเกิด <span class="req">*</span></label><input id="pDob" type="date"><div class="err" id="pDobErr">ผู้เอาประกันภัยต้องมีอายุ 20 – 60 ปี</div></div>
+      <div class="fld"><label>เลขบัตรประชาชน 13 หลัก <span class="req">*</span></label><input id="pCid" inputmode="numeric" maxlength="13" placeholder="X-XXXX-XXXXX-XX-X"><div class="err">เลขบัตรประชาชนไม่ถูกต้อง</div></div>
+      <div class="fld"><label>เบอร์โทรศัพท์ <span class="req">*</span></label><input id="pTel" inputmode="tel" maxlength="10" placeholder="08XXXXXXXX"><div class="err">กรุณากรอกเบอร์โทร 10 หลัก</div></div>
+      <div class="fld"><label>อีเมล <span class="req">*</span></label><input id="pEmail" type="email" placeholder="name@email.com"><div class="err">รูปแบบอีเมลไม่ถูกต้อง</div></div>
+      <div class="fld"><label>อาชีพปัจจุบัน <span class="req">*</span></label><input id="pJob" placeholder="เช่น พนักงานบริษัท"><div class="hint">ต้องไม่เป็นอาชีพเสี่ยงสูงตามเงื่อนไขบริษัทฯ</div><div class="err">กรุณากรอกอาชีพ</div></div>
+      <div class="fld"><label>ส่วนสูง (ซม.) <span class="req">*</span></label><input id="pHeight" inputmode="numeric" maxlength="3" placeholder="165"><div class="err">กรุณากรอกส่วนสูง</div></div>
+      <div class="fld"><label>น้ำหนัก (กก.) <span class="req">*</span></label><input id="pWeight" inputmode="numeric" maxlength="3" placeholder="60"><div class="err">กรุณากรอกน้ำหนัก</div></div>
+      <div class="fld full">
+        <label>แนบสำเนาบัตรประชาชนผู้ปกครอง <span class="req">*</span></label>
+        <label class="upload small" id="upPid"><input type="file" accept="image/*,.pdf" onchange="onDoc(this,'upPid','pIdCard')"><div class="up-t">📎 แตะเพื่อแนบไฟล์บัตรประชาชน</div><div class="up-d">ภาพถ่าย หรือ PDF</div></label>
+        <div class="err">กรุณาแนบบัตรประชาชน</div>
+      </div>
+    </div>
+
+    <div class="form-sec-title" style="margin-top:22px"><span class="n">2</span>บุตร/หลาน (ผู้อยู่ในอุปการะ)</div>
+    <div class="fgrid">
+      <div class="fld"><label>ชื่อ-นามสกุลบุตร/หลาน <span class="req">*</span></label><input id="cName" placeholder="เช่น ด.ช. ฟินดี ใจดี"><div class="err">กรุณากรอกชื่อบุตร/หลาน</div></div>
+      <div class="fld"><label>วัน/เดือน/ปีเกิดบุตร/หลาน <span class="req">*</span></label><input id="cDob" type="date"><div class="err" id="cDobErr">อายุไม่ตรงกับช่วงอายุของแผนที่เลือก</div></div>
+      <div class="fld full"><label>เลขบัตรประชาชนบุตร/หลาน <span class="req">*</span></label><input id="cCid" inputmode="numeric" maxlength="13" placeholder="X-XXXX-XXXXX-XX-X"><div class="err">เลขบัตรประชาชนไม่ถูกต้อง</div></div>
+      <div class="fld full">
+        <label>แนบสูติบัตร หรือบัตรประชาชนบุตร/หลาน <span class="req">*</span></label>
+        <label class="upload small" id="upBirth"><input type="file" accept="image/*,.pdf" onchange="onDoc(this,'upBirth','birthCert')"><div class="up-t">📎 แตะเพื่อแนบสูติบัตร</div><div class="up-d">ภาพถ่าย หรือ PDF</div></label>
+        <div class="err">กรุณาแนบสูติบัตร</div>
+      </div>
+    </div>
+
+    <div class="form-sec-title" style="margin-top:22px"><span class="n">3</span>ที่อยู่สำหรับจัดส่งกรมธรรม์</div>
+    <div class="fgrid">
+      <div class="fld full"><label>ที่อยู่ <span class="req">*</span></label><textarea id="addr" rows="2" placeholder="บ้านเลขที่ หมู่บ้าน ซอย ถนน"></textarea><div class="err">กรุณากรอกที่อยู่</div></div>
+      <div class="fld"><label>จังหวัด <span class="req">*</span></label><select id="prov" onchange="onProvince()"><option value="">— เลือกจังหวัด —</option></select><div class="err">กรุณาเลือกจังหวัด</div></div>
+      <div class="fld"><label>อำเภอ/เขต <span class="req">*</span></label><select id="amph" onchange="onAmphure()" disabled><option value="">— เลือกอำเภอ/เขต —</option></select><div class="err">กรุณาเลือกอำเภอ/เขต</div></div>
+      <div class="fld"><label>ตำบล/แขวง <span class="req">*</span></label><select id="tmb" onchange="onTambon()" disabled><option value="">— เลือกตำบล/แขวง —</option></select><div class="err">กรุณาเลือกตำบล/แขวง</div></div>
+      <div class="fld"><label>รหัสไปรษณีย์ <span class="req">*</span></label><input id="zip" readonly placeholder="เติมอัตโนมัติ" style="background:var(--navy-soft)"><div class="err">กรุณาเลือกตำบล/แขวงก่อน</div></div>
+    </div>
+
+    <div class="note-navy" style="margin-top:16px">
+      <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer">
+        <input type="checkbox" id="consent" style="margin-top:4px;width:18px;height:18px;accent-color:var(--fin-red)">
+        <span>ข้าพเจ้าขอรับรองว่าข้อมูลข้างต้นเป็นความจริงทุกประการ ข้าพเจ้าและผู้อยู่ในอุปการะมีสุขภาพสมบูรณ์แข็งแรง ไม่มีอวัยวะส่วนใดพิการ และได้อ่านทำความเข้าใจรายละเอียดความคุ้มครอง เงื่อนไข และข้อยกเว้นก่อนตัดสินใจทำประกันภัยแล้ว รวมทั้งยินยอมให้บริษัทฯ เก็บรวบรวมและใช้ข้อมูลส่วนบุคคลเพื่อการพิจารณารับประกันภัยตามนโยบาย PDPA</span>
+      </label>
+    </div>
+  </div>
+  <button class="btn btn-red" id="submitBtn" onclick="submitApp()">✓ ยืนยันทำประกัน</button>
+</section>
+
+<!-- ============ STEP 5 : THANK YOU ============ -->
+<section class="panel" id="panel5">
+  <div class="card thanks">
+    <div class="big-ck">✓</div>
+    <h2>ขอบคุณที่ทำประกันกับเรา 🎉</h2>
+    <p style="color:var(--grey)">เราได้รับคำขอเอาประกันภัยของคุณเรียบร้อยแล้ว</p>
+    <div class="ref-box"><div class="k">หมายเลขอ้างอิงคำขอ</div><div class="v" id="refNo"></div></div>
+    <div id="thanksSum" style="font-size:14px;color:var(--grey);margin-bottom:14px"></div>
+    <div class="next-steps">
+      <div class="st"><span class="b">1</span><span>เจ้าหน้าที่ผู้มีใบอนุญาตนายหน้าประกันวินาศภัยจะตรวจสอบข้อมูล สลิป และเอกสาร แล้วติดต่อกลับเพื่อ<b>ยืนยันการทำประกัน</b>ภายใน 1 วันทำการ</span></div>
+      <div class="st"><span class="b">2</span><span>เมื่อบริษัทฯ อนุมัติ กรมธรรม์จะถูกจัดส่งทางอีเมลและที่อยู่ที่ระบุไว้</span></div>
+      <div class="st"><span class="b">3</span><span>ความคุ้มครองการเจ็บป่วยตามโรคที่ระบุ เริ่มเมื่อพ้น<b>ระยะรอคอย 15 วัน</b>นับจากวันที่กรมธรรม์มีผลบังคับ</span></div>
+    </div>
+    <button class="btn line-btn" style="max-width:340px;margin:18px auto 0" onclick="alert('เชื่อมต่อ LINE OA @finforkids')">💬 สอบถาม/ติดตามสถานะทาง LINE @finforkids</button>
+  </div>
+</section>
+
+</main>
+
+<footer class="ribbon"><span>เรื่องประกัน ✓ เราชัดเจน</span><span class="web">www.finforkids.com</span></footer>
+
+<script>
+/* ================= SUPABASE ================= */
+const SUPABASE_URL = 'https://lrhatlgcmnpusopodvkn.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_evCIJ86lBvwQY9gSiMtO7w_y7PGtloz';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const submissionId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(36).slice(2));
+
+/* ================= DATA ================= */
+const AGE_GROUPS = [
+  {key:'infant',  label:'15 วัน – น้อยกว่า 1 ปี', icon:'👶', tag:'คุ้มครอง 5 โรค', min:15/365, max:1},
+  {key:'toddler', label:'1 – 5 ปี',               icon:'🧒', tag:'คุ้มครอง 8 โรค', min:1,  max:6},
+  {key:'kid',     label:'6 – 20 ปี',              icon:'🎒', tag:'คุ้มครอง 8 โรค · เบี้ยเริ่ม 9,150.-', min:6, max:21},
+];
+const PLANS = {
+  1:{name:'Fin for Kids Plus 1', accident:20000, ipd:50000,  opd:1000, premium:{infant:24420, toddler:23050, kid:9150}},
+  2:{name:'Fin for Kids Plus 2', accident:30000, ipd:75000,  opd:1500, premium:{infant:32620, toddler:30810, kid:11660}},
+  3:{name:'Fin for Kids Plus 3', accident:50000, ipd:100000, opd:2000, premium:{infant:37670, toddler:35930, kid:13850}},
+};
+const DISEASES = [
+  {th:'ไข้หวัดใหญ่ (Influenza)', infant:true},
+  {th:'ไข้เลือดออก (Dengue)', infant:true},
+  {th:'โรคติดเชื้อทางเดินหายใจจากไวรัส RSV', infant:true},
+  {th:'โรคหัด (Measles)', infant:true},
+  {th:'ชิคุนกุนยา / ไข้ปวดข้อยุงลาย', infant:true},
+  {th:'ไส้ติ่งอักเสบเฉียบพลัน', infant:false},
+  {th:'โรคมือ เท้า ปาก (HFMD)', infant:false},
+  {th:'โรคไข้สุกใส (Chicken pox)', infant:false},
+];
+const state = { age:null, plan:null, payMode:null, schedule:[], firstPay:0, slipFile:null, docs:{} };
+const fmt = n => n.toLocaleString('th-TH');
+
+/* โหลดเบี้ยล่าสุดจากฐานข้อมูล (แก้เบี้ยใน DB ได้โดยไม่ต้องแก้โค้ด) */
+async function loadPremiums(){
+  try{
+    const {data, error} = await sb.from('plan_premiums').select('plan_id,age_group,annual_premium');
+    if(error || !data || !data.length) return;
+    data.forEach(r=>{
+      const k = r.age_group.toLowerCase();
+      if(PLANS[r.plan_id] && PLANS[r.plan_id].premium[k] !== undefined)
+        PLANS[r.plan_id].premium[k] = r.annual_premium;
+    });
+    if(state.age) pickAge(state.age);
+  }catch(e){ console.warn('โหลดเบี้ยจากฐานข้อมูลไม่สำเร็จ ใช้ค่าในหน้าเว็บแทน', e); }
+}
+
+/* ===== ที่อยู่: จังหวัด → อำเภอ/เขต → ตำบล/แขวง → รหัสไปรษณีย์อัตโนมัติ ===== */
+async function initAddress(){
+  try{
+    const {data,error}=await sb.from('thai_provinces').select('id,name_th').order('name_th');
+    if(error||!data||!data.length) return;
+    document.getElementById('prov').innerHTML='<option value="">— เลือกจังหวัด —</option>'+
+      data.map(p=>`<option value="${p.id}">${p.name_th}</option>`).join('');
+  }catch(e){ console.warn('โหลดรายชื่อจังหวัดไม่สำเร็จ',e); }
+}
+function resetSelect(id,label){
+  const el=document.getElementById(id);
+  el.innerHTML=`<option value="">— ${label} —</option>`;
+  el.disabled=true;
+}
+async function onProvince(){
+  resetSelect('amph','เลือกอำเภอ/เขต');
+  resetSelect('tmb','เลือกตำบล/แขวง');
+  document.getElementById('zip').value='';
+  const pid=+document.getElementById('prov').value;
+  if(!pid) return;
+  const {data,error}=await sb.from('thai_districts').select('id,name_th').eq('province_id',pid).order('name_th');
+  if(error||!data) return;
+  const el=document.getElementById('amph');
+  el.innerHTML='<option value="">— เลือกอำเภอ/เขต —</option>'+data.map(d=>`<option value="${d.id}">${d.name_th}</option>`).join('');
+  el.disabled=false;
+}
+async function onAmphure(){
+  resetSelect('tmb','เลือกตำบล/แขวง');
+  document.getElementById('zip').value='';
+  const did=+document.getElementById('amph').value;
+  if(!did) return;
+  const {data,error}=await sb.from('thai_sub_districts').select('id,name_th,zip_code').eq('district_id',did).order('name_th');
+  if(error||!data) return;
+  const el=document.getElementById('tmb');
+  el.innerHTML='<option value="">— เลือกตำบล/แขวง —</option>'+data.map(t=>`<option value="${t.id}" data-zip="${t.zip_code}">${t.name_th}</option>`).join('');
+  el.disabled=false;
+}
+function onTambon(){
+  const el=document.getElementById('tmb');
+  const zip=el.selectedOptions[0]?.dataset.zip||'';
+  const zipEl=document.getElementById('zip');
+  zipEl.value=zip;
+  if(zip) zipEl.closest('.fld').classList.remove('invalid');
+}
+function selText(id){ const el=document.getElementById(id); return el.value?(el.selectedOptions[0]?.text||''):''; }
+
+/* ================= STEPPER ================= */
+function goStep(n){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show'));
+  document.getElementById('panel'+n).classList.add('show');
+  document.querySelectorAll('.step').forEach(s=>{
+    const k=+s.dataset.step;
+    s.classList.toggle('active',k===n);
+    s.classList.toggle('done',k<n);
+  });
+  if(n===2) renderStep2();
+  if(n===3) renderStep3();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ================= STEP 1 ================= */
+function renderAges(){
+  const g=document.getElementById('ageGrid');
+  g.innerHTML=AGE_GROUPS.map(a=>`
+    <button class="choice ${state.age===a.key?'selected':''}" onclick="pickAge('${a.key}')">
+      <div class="ic">${a.icon}</div><div class="t">อายุ ${a.label}</div><div class="tag">${a.tag}</div>
+    </button>`).join('');
+}
+function pickAge(k){
+  state.age=k; state.plan=null; renderAges();
+  const card=document.getElementById('planPickCard'); card.style.display='block';
+  document.getElementById('planPickSub').textContent='เบี้ยประกันภัยรายปี (รวมอากรแสตมป์) สำหรับบุตร/หลานอายุ '+AGE_GROUPS.find(a=>a.key===k).label;
+  document.getElementById('planGrid').innerHTML=[1,2,3].map(i=>{
+    const p=PLANS[i];
+    return `<div class="plan-card ${i===3?'hot':''} ${state.plan===i?'selected':''}" style="position:relative">
+      ${i===3?'<span class="hot-badge">คุ้มครองสูงสุด</span>':''}
+      <div class="plan-head">${p.name}</div>
+      <div class="plan-body">
+        <div class="plan-price">${fmt(p.premium[k])} <small>บาท/ปี</small></div>
+        <ul class="plan-feat">
+          <li>IPD เหมาจ่ายครั้งละ ${fmt(p.ipd)}.-</li>
+          <li>อุบัติเหตุครั้งละ ${fmt(p.accident)}.-</li>
+          <li>OPD ครั้งละ ${fmt(p.opd)}.-</li>
+        </ul>
+        <button class="btn ${i===3?'btn-red':'btn-navy'} btn-sm" style="width:100%;margin-top:8px" onclick="pickPlan(${i})">เลือกแผนนี้</button>
+      </div></div>`;
+  }).join('');
+  renderPlanDots();
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function pickPlan(i){ state.plan=i; state.payMode=null; state.slipFile=null; goStep(2); }
+
+/* จุดบอกตำแหน่งการ์ดแผน (มือถือเลื่อนซ้าย-ขวา) */
+function renderPlanDots(){
+  const pg=document.getElementById('planGrid');
+  const dots=document.getElementById('planDots');
+  dots.innerHTML=[0,1,2].map(i=>`<button class="pd ${i===0?'on':''}" aria-label="แผนที่ ${i+1}" onclick="scrollToPlan(${i})"></button>`).join('');
+  pg.onscroll=()=>{
+    const max=pg.scrollWidth-pg.clientWidth;
+    if(max<=0) return;
+    const idx=Math.min(2,Math.round(pg.scrollLeft/max*2));
+    dots.querySelectorAll('.pd').forEach((d,i)=>d.classList.toggle('on',i===idx));
+  };
+}
+function scrollToPlan(i){
+  const pg=document.getElementById('planGrid');
+  pg.children[i]?.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+
+/* ================= STEP 2 ================= */
+function renderStep2(){
+  const k=state.age;
+  const head=[1,2,3].map(i=>`<th class="${state.plan===i?'sel-col':''}">${PLANS[i].name.replace('Fin for Kids ','')}</th>`).join('');
+  const cell=(fn)=>[1,2,3].map(i=>`<td class="num ${state.plan===i?'sel-col':''}">${fn(PLANS[i],i)}</td>`).join('');
+  document.getElementById('covTable').innerHTML=`
+    <thead><tr><th style="text-align:left">ความคุ้มครอง (บาท)</th>${head}</tr></thead>
+    <tbody>
+      <tr class="sec"><td colspan="4">ความคุ้มครองสำหรับผู้เอาประกันภัย (ผู้ปกครอง)</td></tr>
+      <tr><td>เสียชีวิต สูญเสียอวัยวะ สายตา หรือทุพพลภาพถาวรสิ้นเชิง (อบ.1)</td>${cell(()=>'500,000')}</tr>
+      <tr><td>ค่าปลงศพและค่าใช้จ่ายจัดการงานศพ (กรณีเจ็บป่วย รอคอย 180 วัน)</td>${cell(()=>'10,000')}</tr>
+      <tr class="sec"><td colspan="4">ความคุ้มครองสำหรับบุตร/หลาน</td></tr>
+      <tr><td>ค่ารักษาพยาบาลจากอุบัติเหตุ ต่อครั้ง</td>${cell(p=>fmt(p.accident))}</tr>
+      <tr><td>ค่ารักษาผู้ป่วยใน (IPD) จ่ายตามจริง ต่อการเข้าพักรักษาครั้งใดครั้งหนึ่ง</td>${cell(p=>fmt(p.ipd))}</tr>
+      <tr><td style="padding-left:20px">• ค่าห้องปกติ ค่าอาหาร ค่าบริการพยาบาล สูงสุด/วัน</td>${cell(()=>'3,000')}</tr>
+      <tr><td style="padding-left:20px">• ค่าห้อง ICU และค่าบริการพยาบาล สูงสุด/วัน</td>${cell(()=>'6,000')}</tr>
+      <tr><td>ค่ารักษาผู้ป่วยนอก (OPD) ต่อครั้ง (สูงสุด 30 วัน/ปี, 7 ครั้ง/โรค)</td>${cell(p=>fmt(p.opd))}</tr>
+      <tr class="sec"><td>เบี้ยประกันภัยรายปี (รวมอากรแสตมป์)</td>${cell(p=>fmt(p.premium[k]))}</tr>
+      <tr class="pickrow"><td></td>${[1,2,3].map(i=>`<td class="num"><button class="btn ${state.plan===i?'btn-red':'btn-outline'} btn-sm" onclick="pickPlan2(${i})">${state.plan===i?'✓ แผนที่เลือก':'เลือกแผนนี้'}</button></td>`).join('')}</tr>
+    </tbody>`;
+  const infant=k==='infant';
+  document.getElementById('dzTitle').textContent='โรคที่ได้รับความคุ้มครอง · อายุ '+AGE_GROUPS.find(a=>a.key===k).label+(infant?' (5 โรค)':' (8 โรค)');
+  document.getElementById('dzList').innerHTML=DISEASES.map(d=>{
+    const on=infant?d.infant:true;
+    return `<div class="dz ${on?'':'off'}"><span class="ck">${on?'✔':'—'}</span>${d.th}</div>`;
+  }).join('');
+}
+function pickPlan2(i){ state.plan=i; state.payMode=null; state.slipFile=null; goStep(3); }
+
+/* ================= STEP 3 : PAYMENT ================= */
+function calcSchedule(total,mode){
+  // ปัดเศษขึ้นให้ครบ 1 บาท ไม่มีเศษทศนิยม (ตรงกับสูตรฝั่งเซิร์ฟเวอร์)
+  if(mode==='full') return [total];
+  if(mode==='3'||mode==='4'){
+    const n=+mode, per=Math.ceil(total/n);
+    return Array(n).fill(per);
+  }
+  if(mode==='6'){
+    const first=Math.ceil(total*0.20);
+    const rest=Math.ceil((total-first)/5);
+    return [first,rest,rest,rest,rest,rest];
+  }
+}
+function renderStep3(){
+  const p=PLANS[state.plan], total=p.premium[state.age];
+  const ag=AGE_GROUPS.find(a=>a.key===state.age);
+  document.getElementById('sumBody').innerHTML=`
+    <div class="sum-row"><span class="k">แผนประกันภัย</span><span class="v">ประกันภัยโรคสุดฮิต ${p.name}</span></div>
+    <div class="sum-row"><span class="k">ช่วงอายุบุตร/หลาน</span><span class="v">${ag.label}</span></div>
+    <div class="sum-row"><span class="k">ความคุ้มครองเด่น</span><span class="v">IPD ${fmt(p.ipd)}.- · อุบัติเหตุ ${fmt(p.accident)}.- · OPD ${fmt(p.opd)}.-</span></div>
+    <div class="sum-total"><span class="k kanit" style="font-weight:600;color:var(--ink)">เบี้ยประกันภัยรายปี (รวมอากรแสตมป์)</span><span class="v">${fmt(total)} บาท</span></div>`;
+  const opts=[
+    {m:'full',t:'จ่ายเต็มจำนวน',d:fmt(total)+' บาท'},
+    {m:'3',t:'ผ่อน 3 งวด',d:'หารเท่ากัน 0%'},
+    {m:'4',t:'ผ่อน 4 งวด',d:'หารเท่ากัน 0%'},
+    {m:'6',t:'ผ่อน 6 งวด',d:'งวดแรก 20% · 0%'},
+  ];
+  document.getElementById('payGrid').innerHTML=opts.map(o=>`
+    <button class="pay-opt ${state.payMode===o.m?'selected':''}" onclick="pickPay('${o.m}')">
+      <div class="t">${o.t}</div><div class="d">${o.d}</div>
+    </button>`).join('');
+  document.getElementById('payDetail').innerHTML='';
+  document.getElementById('bankCard').style.display = state.payMode ? 'block':'none';
+  updateNextBtn();
+  if(state.payMode) pickPay(state.payMode,true);
+}
+function pickPay(m,keep){
+  state.payMode=m;
+  if(!keep){ state.slipFile=null; resetSlip(); }
+  const p=PLANS[state.plan], total=p.premium[state.age];
+  state.schedule=calcSchedule(total,m);
+  state.firstPay=state.schedule[0];
+  document.querySelectorAll('.pay-opt').forEach((el,i)=>el.classList.toggle('selected',['full','3','4','6'][i]===m));
+  const sum=state.schedule.reduce((a,b)=>a+b,0);
+  let html='';
+  if(m==='full'){
+    html=`<div class="note-navy" style="margin-top:14px">ชำระครั้งเดียว <b>${fmt(total)} บาท</b> — คุ้มครองทันทีเมื่อบริษัทฯ อนุมัติ (โรคที่ระบุมีระยะรอคอย 15 วัน)</div>`;
+  }else{
+    html=`<table class="inst-table"><thead><tr><th style="text-align:left">งวดที่</th><th>กำหนดชำระ</th><th>ยอดชำระ (บาท)</th></tr></thead><tbody>`+
+      state.schedule.map((v,i)=>{
+        const d=new Date(); d.setMonth(d.getMonth()+i);
+        const due=i===0?'วันนี้':d.toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
+        return `<tr><td>งวดที่ ${i+1}${i===0?' <span style="color:var(--fin-red);font-size:12px">(ชำระเพื่อเริ่มคุ้มครอง)</span>':''}</td><td>${due}</td><td class="kanit" style="font-weight:600">${fmt(v)}</td></tr>`;
+      }).join('')+
+      `</tbody><tfoot><tr><td colspan="2">รวมเบี้ยผ่อนทั้งสิ้น (ปัดเศษให้ครบ 1 บาท)</td><td>${fmt(sum)}</td></tr></tfoot></table>
+      <div class="note-navy">ผ่อน 0% ไม่มีดอกเบี้ย · ยอดแต่ละงวดปัดเศษขึ้นเป็นจำนวนเต็มบาท จึงอาจสูงกว่าเบี้ยรายปีเล็กน้อย (${fmt(sum-total)} บาท)</div>`;
+  }
+  document.getElementById('payDetail').innerHTML=html;
+  document.getElementById('bankCard').style.display='block';
+  document.getElementById('payNow').textContent=fmt(state.firstPay)+' บาท';
+  updateNextBtn();
+}
+function copyAcc(no,btn){ navigator.clipboard?.writeText(no); btn.textContent='คัดลอกแล้ว ✓'; setTimeout(()=>btn.textContent='คัดลอก',1500); }
+function onSlip(inp){
+  if(!inp.files.length) return;
+  const f=inp.files[0];
+  if(f.size>10*1024*1024){ alert('ไฟล์สลิปต้องมีขนาดไม่เกิน 10 MB'); inp.value=''; return; }
+  state.slipFile=f;
+  const up=document.getElementById('slipUp'); up.classList.add('done');
+  document.getElementById('slipT').textContent='✓ แนบสลิปแล้ว';
+  document.getElementById('slipD').textContent=f.name+' · แตะเพื่อเปลี่ยนไฟล์';
+  updateNextBtn();
+}
+function resetSlip(){
+  const up=document.getElementById('slipUp'); if(!up) return;
+  up.classList.remove('done');
+  document.getElementById('slipT').textContent='📎 แนบสลิปการโอนเงิน';
+  document.getElementById('slipD').textContent='รองรับไฟล์ภาพ หรือ PDF ขนาดไม่เกิน 10 MB';
+}
+function updateNextBtn(){
+  const b=document.getElementById('toStep4');
+  b.disabled=!(state.payMode&&state.slipFile);
+  b.textContent=state.slipFile?'ไปขั้นตอนถัดไป — กรอกข้อมูลผู้สมัคร ›':'แนบสลิปเพื่อไปขั้นตอนถัดไป';
+}
+
+/* ================= STEP 4 : FORM ================= */
+function onDoc(inp,boxId,key){
+  if(!inp.files.length) return;
+  const f=inp.files[0];
+  if(f.size>10*1024*1024){ alert('ไฟล์ต้องมีขนาดไม่เกิน 10 MB'); inp.value=''; return; }
+  state.docs[key]=f;
+  const box=document.getElementById(boxId);
+  box.classList.add('done');
+  box.querySelector('.up-t').textContent='✓ แนบไฟล์แล้ว';
+  box.querySelector('.up-d').textContent=f.name+' · แตะเพื่อเปลี่ยนไฟล์';
+  box.closest('.fld').classList.remove('invalid');
+}
+function validCid(id){
+  if(!/^\d{13}$/.test(id)) return false;
+  let s=0; for(let i=0;i<12;i++) s+=+id[i]*(13-i);
+  return (11-s%11)%10===+id[12];
+}
+function ageYears(dob){ return (Date.now()-new Date(dob).getTime())/(365.25*24*3600*1000); }
+function mark(id,ok){ document.getElementById(id).closest('.fld').classList.toggle('invalid',!ok); return ok; }
+
+/* อัปโหลดไฟล์เข้า Supabase Storage แล้วคืนข้อมูลไฟล์สำหรับ payload */
+async function uploadDoc(file,key){
+  const ext=(file.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
+  const path=`${submissionId}/${key}-${Date.now()}.${ext}`;
+  const {error}=await sb.storage.from('applications').upload(path,file,{
+    contentType:file.type||'application/octet-stream'
+  });
+  if(error){ console.error('upload error',key,error); throw new Error('UPLOAD_FAILED'); }
+  return {path,name:file.name,size:file.size,mime:file.type||''};
+}
+
+const ERROR_TH={
+  DUPLICATE_CHILD:'บุตร/หลานคนนี้มีคำขอเอาประกันภัย FIN FOR KIDS PLUS อยู่แล้ว (เงื่อนไข 1 ฉบับ ต่อ 1 คน)',
+  INVALID_PARENT_AGE:'ผู้เอาประกันภัยต้องมีอายุ 20 – 60 ปี',
+  INVALID_PARENT_CID:'เลขบัตรประชาชนผู้ปกครองไม่ถูกต้อง',
+  INVALID_CHILD_CID:'เลขบัตรประชาชนบุตร/หลานไม่ถูกต้อง',
+  INVALID_CHILD_AGE:'อายุบุตร/หลานไม่ตรงกับช่วงอายุของแผนที่เลือก',
+  INVALID_PHONE:'เบอร์โทรศัพท์ไม่ถูกต้อง',
+  INVALID_EMAIL:'รูปแบบอีเมลไม่ถูกต้อง',
+  INVALID_POSTAL_CODE:'รหัสไปรษณีย์ไม่ถูกต้อง',
+  INVALID_ADDRESS:'กรุณากรอกที่อยู่ให้ครบถ้วน',
+  PDPA_CONSENT_REQUIRED:'กรุณายอมรับคำรับรองและความยินยอม PDPA',
+  PLAN_NOT_FOUND:'ไม่พบแผนประกันที่เลือก กรุณาลองใหม่อีกครั้ง',
+  UPLOAD_FAILED:'อัปโหลดเอกสารไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่',
+};
+
+let submitting=false;
+async function submitApp(){
+  if(submitting) return;
+  let ok=true;
+  ok&=mark('pName',document.getElementById('pName').value.trim().length>2);
+  const pd=document.getElementById('pDob').value;
+  const pAge=pd?ageYears(pd):0;
+  ok&=mark('pDob',pd&&pAge>=20&&pAge<=60);
+  ok&=mark('pCid',validCid(document.getElementById('pCid').value.trim()));
+  ok&=mark('pTel',/^0\d{9}$/.test(document.getElementById('pTel').value.trim()));
+  ok&=mark('pEmail',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('pEmail').value.trim()));
+  ok&=mark('pJob',document.getElementById('pJob').value.trim().length>1);
+  ok&=mark('pHeight',+document.getElementById('pHeight').value>=100);
+  ok&=mark('pWeight',+document.getElementById('pWeight').value>=25);
+  ok&=(state.docs.pIdCard?true:(document.getElementById('upPid').closest('.fld').classList.add('invalid'),false));
+  ok&=mark('cName',document.getElementById('cName').value.trim().length>2);
+  const cd=document.getElementById('cDob').value;
+  const ag=AGE_GROUPS.find(a=>a.key===state.age);
+  const cAge=cd?ageYears(cd):-1;
+  ok&=mark('cDob',cd&&cAge>=ag.min&&cAge<ag.max);
+  ok&=mark('cCid',validCid(document.getElementById('cCid').value.trim()));
+  ok&=(state.docs.birthCert?true:(document.getElementById('upBirth').closest('.fld').classList.add('invalid'),false));
+  ok&=mark('addr',document.getElementById('addr').value.trim().length>8);
+  ok&=mark('prov',!!document.getElementById('prov').value);
+  ok&=mark('amph',!!document.getElementById('amph').value);
+  ok&=mark('tmb',!!document.getElementById('tmb').value);
+  ok&=mark('zip',/^\d{5}$/.test(document.getElementById('zip').value.trim()));
+  if(!document.getElementById('consent').checked){ alert('กรุณาติ๊กยอมรับคำรับรองและความยินยอม PDPA ก่อนยืนยันทำประกัน'); return; }
+  if(!ok){
+    document.querySelector('.fld.invalid')?.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+  if(!state.slipFile){ alert('ไม่พบสลิปการโอนเงิน กรุณาย้อนกลับไปแนบสลิปในขั้นตอนที่ 3'); return; }
+
+  const btn=document.getElementById('submitBtn');
+  submitting=true; btn.disabled=true; btn.textContent='⏳ กำลังส่งข้อมูล...';
+  try{
+    // 1) อัปโหลดเอกสารทั้ง 3 ไฟล์เข้า Supabase Storage
+    btn.textContent='⏳ กำลังอัปโหลดเอกสาร...';
+    const [slipDoc,pidDoc,bcDoc]=await Promise.all([
+      uploadDoc(state.slipFile,'payment-slip'),
+      uploadDoc(state.docs.pIdCard,'parent-id-card'),
+      uploadDoc(state.docs.birthCert,'child-birth-cert'),
+    ]);
+
+    // 2) ส่งใบสมัครผ่าน RPC (เซิร์ฟเวอร์ตรวจสอบ + เข้ารหัสเลขบัตร + คำนวณงวดเอง)
+    btn.textContent='⏳ กำลังบันทึกใบสมัคร...';
+    const payload={
+      plan_id:state.plan,
+      age_group:state.age.toUpperCase(),
+      pay_mode:state.payMode==='full'?'FULL':'INST_'+state.payMode,
+      pdpa_consent:true,
+      utm_source:new URLSearchParams(location.search).get('utm_source')||'web',
+      parent:{
+        full_name:document.getElementById('pName').value.trim(),
+        birth_date:pd,
+        citizen_id:document.getElementById('pCid').value.trim(),
+        phone:document.getElementById('pTel').value.trim(),
+        email:document.getElementById('pEmail').value.trim(),
+        occupation:document.getElementById('pJob').value.trim(),
+        height_cm:+document.getElementById('pHeight').value,
+        weight_kg:+document.getElementById('pWeight').value,
+      },
+      child:{
+        full_name:document.getElementById('cName').value.trim(),
+        birth_date:cd,
+        citizen_id:document.getElementById('cCid').value.trim(),
+      },
+      address:{
+        address_text:document.getElementById('addr').value.trim(),
+        sub_district:selText('tmb'),
+        district:selText('amph'),
+        province:selText('prov'),
+        postal_code:document.getElementById('zip').value.trim(),
+      },
+      documents:{
+        payment_slip:slipDoc,
+        parent_id_card:pidDoc,
+        child_birth_cert:bcDoc,
+      },
+    };
+    const {data,error}=await sb.rpc('submit_application',{payload});
+    if(error){
+      const key=Object.keys(ERROR_TH).find(k=>(error.message||'').includes(k));
+      throw new Error(key||'GENERIC');
+    }
+
+    // 3) แสดงผลจากเซิร์ฟเวอร์ (เลขอ้างอิง/ยอดจริง)
+    const p=PLANS[state.plan];
+    document.getElementById('refNo').textContent=data.ref_no;
+    document.getElementById('thanksSum').innerHTML=`${p.name} · เบี้ยรายปี ${fmt(data.annual_premium)} บาท · ${state.payMode==='full'?'ชำระเต็มจำนวน':'ผ่อน '+state.payMode+' งวด'} · ชำระงวดแรกแล้ว ${fmt(data.first_amount)} บาท`;
+    goStep(5);
+  }catch(e){
+    console.error(e);
+    alert('❌ '+(ERROR_TH[e.message]||'ส่งข้อมูลไม่สำเร็จ กรุณาลองใหม่อีกครั้ง หรือติดต่อเจ้าหน้าที่ทาง LINE @finforkids'));
+  }finally{
+    submitting=false; btn.disabled=false; btn.textContent='✓ ยืนยันทำประกัน';
+  }
+}
+
+/* นาฬิกา: วัน วันที่ เดือน ปี พ.ศ. + เวลาเดินทุกวินาที */
+function tickClock(){
+  const now=new Date();
+  document.getElementById('curDate').textContent='📅 '+now.toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  document.getElementById('curTime').textContent='🕐 '+now.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit',second:'2-digit'})+' น.';
+}
+tickClock();
+setInterval(tickClock,1000);
+
+/* init */
+renderAges();
+goStep(1);
+loadPremiums();
+initAddress();
+</script>
+</body>
+</html>
