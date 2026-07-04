@@ -1121,7 +1121,7 @@ async function submitApp(){
   ok&=mark('pWeight',+document.getElementById('pWeight').value>=25);
   ok&=(state.docs.pIdCard?true:(document.getElementById('upPid').closest('.fld').classList.add('invalid'),false));
   ok&=(state.docs.birthCert?true:(document.getElementById('upBirth').closest('.fld').classList.add('invalid'),false));
-  ok&=mark('addr',document.getElementById('addr').value.trim().length>8);
+  ok&=mark('addr',document.getElementById('addr').value.trim().length>0);
   ok&=mark('prov',!!document.getElementById('prov').value);
   ok&=mark('amph',!!document.getElementById('amph').value);
   ok&=mark('tmb',!!document.getElementById('tmb').value);
