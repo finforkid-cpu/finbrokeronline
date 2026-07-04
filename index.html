@@ -97,7 +97,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .choice .d{font-size:13px;color:var(--grey)}
 .choice .tag{display:inline-block;margin-top:8px;font-size:12px;background:var(--navy-soft);color:var(--navy);border-radius:99px;padding:2px 10px;font-weight:600}
 
-.plan-card{border:2px solid var(--line);border-radius:18px;background:#fff;overflow:hidden;transition:.2s;display:flex;flex-direction:column;box-shadow:0 4px 14px rgba(27,20,100,.06);cursor:pointer}
+.plan-card{border:2px solid var(--line);border-radius:18px;background:#fff;overflow:visible;transition:.2s;display:flex;flex-direction:column;box-shadow:0 4px 14px rgba(27,20,100,.06);cursor:pointer}
 .plan-card:hover{border-color:var(--fin-red);transform:translateY(-2px)}
 .plan-card:active{transform:scale(.98)}
 .plan-card.selected{border-color:var(--fin-red);background:var(--fin-red-soft);box-shadow:0 0 0 4px var(--fin-red-soft)}
@@ -555,6 +555,15 @@ const LIFF_DEBUG = location.href.indexOf('liffdebug') > -1;
     if (LIFF_DEBUG) alert('⚠️ LIFF ' + liffErr);
   }
 })();
+
+/* โหมดทดสอบ (?liffdebug): ปุ่มลอยกดส่ง Flex ตัวอย่างเข้าแชททันที ไม่ต้องกรอกฟอร์ม */
+if (LIFF_DEBUG) {
+  const tb = document.createElement('button');
+  tb.textContent = '🧪 ทดสอบส่ง Flex';
+  tb.style.cssText = 'position:fixed;right:12px;bottom:120px;z-index:99;background:#1B1464;color:#fff;border:none;border-radius:99px;padding:12px 16px;font-family:Kanit,sans-serif;font-weight:600;font-size:14px;box-shadow:0 4px 14px rgba(0,0,0,.3)';
+  tb.onclick = () => sendLineFlex('FFK-TEST-0001', 'Fin for Kids Plus 3', 35930, 'ชำระเต็มจำนวน', 35930);
+  document.body.appendChild(tb);
+}
 const submissionId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(36).slice(2));
 
 /* ================= DATA ================= */
