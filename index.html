@@ -446,11 +446,16 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ================= LINE LIFF ================= */
 /* ใส่ LIFF ID จาก LINE Developers Console เช่น '1234567890-AbcdEfgh' */
 const LIFF_ID = '2005495388-S62xumht';
-let liffOk = false;
+let liffOk = false, liffErr = '';
+const LIFF_DEBUG = location.href.indexOf('liffdebug') > -1;
 (async () => {
-  if (!window.liff || LIFF_ID.startsWith('REPLACE')) return;
+  if (!window.liff) { liffErr = 'LIFF SDK โหลดไม่ขึ้น'; return; }
   try { await liff.init({ liffId: LIFF_ID }); liffOk = true; }
-  catch (e) { console.warn('LIFF init failed', e); }
+  catch (e) {
+    liffErr = 'init ล้มเหลว: ' + (e.message || e);
+    console.warn('LIFF init failed', e);
+    if (LIFF_DEBUG) alert('⚠️ LIFF ' + liffErr);
+  }
 })();
 const submissionId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(36).slice(2));
 
@@ -817,10 +822,22 @@ function buildFlex(refNo,planName,annual,payText,firstAmt){
 
 /* ส่ง Flex เข้าห้องแชท (ทำงานเฉพาะเปิดผ่าน LIFF ในแอป LINE — นอกนั้นข้ามเงียบ ๆ ไม่กระทบการสมัคร) */
 async function sendLineFlex(refNo,planName,annual,payText,firstAmt){
+  let why='';
   try{
-    if(!liffOk||!liff.isInClient()||!liff.isApiAvailable('sendMessages')) return;
-    await liff.sendMessages([buildFlex(refNo,planName,annual,payText,firstAmt)]);
-  }catch(e){ console.warn('send flex failed',e); }
+    if(!liffOk){ why=liffErr||'LIFF ยังไม่พร้อม (เปิดนอกแอป LINE?)'; }
+    else if(!liff.isInClient()){ why='ไม่ได้เปิดในแอป LINE'; }
+    else if(!liff.isApiAvailable('sendMessages')){
+      const ctx=(liff.getContext()||{}).type||'ไม่ทราบ';
+      why='sendMessages ใช้ไม่ได้ · บริบทที่เปิด: '+ctx+' (ต้องเปิดจากห้องแชท และ LIFF ต้องมี scope chat_message.write)';
+    }
+    else{
+      await liff.sendMessages([buildFlex(refNo,planName,annual,payText,firstAmt)]);
+      if(LIFF_DEBUG) alert('✅ ส่ง Flex เข้าแชทสำเร็จ');
+      return;
+    }
+  }catch(e){ why='ส่งไม่สำเร็จ: '+(e.message||e); }
+  console.warn('flex skipped:',why);
+  if(LIFF_DEBUG) alert('⚠️ ไม่ได้ส่ง Flex — '+why);
 }
 
 let submitting=false;
