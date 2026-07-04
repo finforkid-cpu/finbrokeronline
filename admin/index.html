@@ -36,6 +36,9 @@ input,select{font-family:inherit;font-size:15px}
 .btn-red:hover{background:var(--fin-red-dark)}
 .btn-navy{background:var(--navy);color:#fff}
 .btn-ghost{background:var(--navy-soft);color:var(--navy)}
+.btn-outline-red{background:#fff;color:var(--fin-red);border:2px solid var(--fin-red)}
+.btn-outline-red:hover{background:var(--fin-red-soft)}
+.btn-ok{background:var(--ok);color:#fff}
 .btn:disabled{background:#C9CBD6;color:#fff;cursor:not-allowed}
 
 .wrap{max-width:1120px;margin:0 auto;padding:20px 18px 70px}
@@ -51,6 +54,9 @@ input,select{font-family:inherit;font-size:15px}
 .fld label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
 .fld input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff}
 .fld input:focus{outline:none;border-color:var(--fin-red);box-shadow:0 0 0 3px var(--fin-red-soft)}
+.efgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
+.efgrid .full{grid-column:1/-1}
+@media(max-width:560px){.efgrid{grid-template-columns:1fr}}
 .login-err{display:none;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px}
 
 /* ===== Stat tiles ===== */
@@ -426,7 +432,11 @@ async function openModal(id){
       <select id="newStatus">${Object.entries(STATUS).filter(([k])=>k!=='DRAFT'&&k!=='SLIP_UPLOADED').map(([k,v])=>`<option value="${k}" ${a.status===k?'selected':''}>${v.i} ${v.t}</option>`).join('')}</select>
       <button class="btn btn-navy" id="saveStBtn" onclick="saveStatus(${a.app_id})">บันทึกสถานะ</button>
     </div>
-    <div class="approve-note">💡 เมื่อเปลี่ยนเป็น "✓ อนุมัติแล้ว" ระบบจะส่งการ์ดแจ้งลูกค้าทาง LINE อัตโนมัติ (บริษัทรับข้อมูลแล้ว · กรมธรรม์ออกภายใน 15 วันทำการ)</div>`;
+    <div class="approve-note">💡 เมื่อเปลี่ยนเป็น "✓ อนุมัติแล้ว" ระบบจะส่งการ์ดแจ้งลูกค้าทาง LINE อัตโนมัติ (บริษัทรับข้อมูลแล้ว · กรมธรรม์ออกภายใน 15 วันทำการ)</div>
+    <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="editApp(${a.app_id})">✏️ แก้ไขข้อมูล</button>
+      <button class="btn btn-outline-red" onclick="delApp(${a.app_id})">🗑 ลบรายการ</button>
+    </div>`;
   document.getElementById('overlay').classList.add('show');
   const grid=document.getElementById('docGrid');
   const docs=a.documents||[];
@@ -442,6 +452,72 @@ async function openModal(id){
   grid.innerHTML=items.join('');
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
+/* ===== แก้ไขข้อมูลผู้สมัคร/ที่อยู่ ===== */
+function editApp(id){
+  const a=APPS.find(x=>x.app_id===id); if(!a) return;
+  const ap=one(a.applicants)||{}, ad=one(a.addresses)||{};
+  const F=(id,label,val,attrs='')=>`<div class="fld"><label>${label}</label><input id="${id}" value="${(val??'').toString().replace(/"/g,'&quot;')}" ${attrs}></div>`;
+  document.getElementById('modalBody').innerHTML=`
+    <h3 class="kanit" style="color:var(--navy);font-size:17px;padding-right:26px;margin-bottom:12px">✏️ แก้ไขข้อมูล · ${a.ref_no}</h3>
+    <div class="sec-head"><h3 style="font-size:15px">ผู้ปกครอง</h3></div>
+    <div class="efgrid">
+      ${F('eName','ชื่อ-นามสกุล',ap.full_name)}
+      ${F('ePhone','เบอร์โทรศัพท์',ap.phone,'inputmode="tel" maxlength="10"')}
+      ${F('eEmail','อีเมล',ap.email,'type="email"')}
+      ${F('eJob','อาชีพ',ap.occupation)}
+      ${F('eH','ส่วนสูง (ซม.)',ap.height_cm,'inputmode="numeric" maxlength="3"')}
+      ${F('eW','น้ำหนัก (กก.)',ap.weight_kg,'inputmode="numeric" maxlength="3"')}
+    </div>
+    <div class="sec-head"><h3 style="font-size:15px">ที่อยู่จัดส่งกรมธรรม์</h3></div>
+    <div class="efgrid">
+      <div class="fld full"><label>ที่อยู่</label><input id="eAddr" value="${(ad.address_text||'').replace(/"/g,'&quot;')}"></div>
+      ${F('eTmb','ตำบล/แขวง',ad.sub_district)}
+      ${F('eAmph','อำเภอ/เขต',ad.district)}
+      ${F('eProv','จังหวัด',ad.province)}
+      ${F('eZip','รหัสไปรษณีย์',ad.postal_code,'inputmode="numeric" maxlength="5"')}
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-ok" id="saveEditBtn" onclick="saveEdit(${a.app_id})">💾 บันทึกการแก้ไข</button>
+      <button class="btn btn-ghost" onclick="openModal(${a.app_id})">ยกเลิก</button>
+    </div>`;
+}
+async function saveEdit(id){
+  const v=x=>document.getElementById(x).value.trim();
+  if(!/^0\d{9}$/.test(v('ePhone'))){ toast('⚠️ เบอร์โทรต้องเป็นตัวเลข 10 หลักขึ้นต้นด้วย 0'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('eEmail'))){ toast('⚠️ รูปแบบอีเมลไม่ถูกต้อง'); return; }
+  if(v('eName').length<3){ toast('⚠️ กรุณากรอกชื่อ-นามสกุล'); return; }
+  if(!/^\d{5}$/.test(v('eZip'))){ toast('⚠️ รหัสไปรษณีย์ต้องเป็นตัวเลข 5 หลัก'); return; }
+  const btn=document.getElementById('saveEditBtn');
+  btn.disabled=true; btn.textContent='กำลังบันทึก...';
+  const {error:e1}=await sb.from('applicants').update({
+    full_name:v('eName'), phone:v('ePhone'), email:v('eEmail').toLowerCase(),
+    occupation:v('eJob'), height_cm:+v('eH')||0, weight_kg:+v('eW')||0,
+  }).eq('app_id',id);
+  const {error:e2}=await sb.from('addresses').update({
+    address_text:v('eAddr'), sub_district:v('eTmb'), district:v('eAmph'),
+    province:v('eProv'), postal_code:v('eZip'),
+  }).eq('app_id',id);
+  if(e1||e2){ btn.disabled=false; btn.textContent='💾 บันทึกการแก้ไข'; toast('❌ บันทึกไม่สำเร็จ: '+(e1||e2).message); return; }
+  toast('✅ บันทึกการแก้ไขเรียบร้อย');
+  await loadData();
+  openModal(id);
+}
+
+/* ===== ลบรายการ (ลบไฟล์แนบ + ข้อมูลทุกตารางที่เกี่ยวข้อง) ===== */
+async function delApp(id){
+  const a=APPS.find(x=>x.app_id===id); if(!a) return;
+  if(!confirm('ลบใบสมัคร '+a.ref_no+' ถาวร?\n\nข้อมูลผู้สมัคร งวดชำระ ประวัติสถานะ และไฟล์แนบทั้งหมดจะถูกลบ กู้คืนไม่ได้')) return;
+  const paths=(a.documents||[]).map(d=>d.file_path).filter(Boolean);
+  if(paths.length){
+    const {error:se}=await sb.storage.from('applications').remove(paths);
+    if(se) toast('⚠️ ลบไฟล์แนบบางส่วนไม่สำเร็จ: '+se.message);
+  }
+  const {error}=await sb.from('applications').delete().eq('app_id',id);
+  if(error){ toast('❌ ลบไม่สำเร็จ: '+error.message); return; }
+  toast('🗑 ลบใบสมัคร '+a.ref_no+' เรียบร้อยแล้ว');
+  closeModal(); loadData();
+}
 
 async function saveStatus(id){
   const st=document.getElementById('newStatus').value;
