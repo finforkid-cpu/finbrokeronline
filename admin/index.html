@@ -94,6 +94,32 @@ input,select{font-family:inherit;font-size:15px}
 .legend b{font-family:'Kanit';color:var(--navy)}
 .prop-gap{height:18px}
 
+/* ===== ช่วงอายุ × แผน (เจาะดูรายชื่อ) ===== */
+.age-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:860px){.age-grid{grid-template-columns:1fr}}
+.age-col{background:var(--bg);border-radius:14px;padding:14px}
+.age-head{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+.age-head .ae{font-size:30px;line-height:1}
+.age-head .at{font-family:'Kanit';font-weight:600;color:var(--navy);font-size:14.5px;line-height:1.3}
+.age-head .as{font-size:12px;color:var(--grey)}
+.age-head .as b{font-family:'Kanit';color:var(--fin-red)}
+.plan-row{display:grid;grid-template-columns:1fr auto auto 16px;gap:8px;align-items:center;width:100%;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;margin-bottom:6px;transition:.15s;text-align:left}
+.plan-row:hover{border-color:var(--fin-red)}
+.pr-n{font-family:'Kanit';font-weight:600;color:var(--navy);font-size:14px}
+.pr-c{font-size:12.5px;color:var(--grey);white-space:nowrap}
+.pr-a{font-family:'Kanit';font-weight:600;color:var(--fin-red);font-size:13px;white-space:nowrap}
+.pr-x{color:var(--grey);transition:.2s;font-size:12px}
+.plan-row.open .pr-x{transform:rotate(180deg)}
+.ap-list{display:none;margin:-2px 0 8px;background:#fff;border:1.5px dashed var(--line);border-radius:10px;padding:4px}
+.ap-list.open{display:block}
+.ap-item{display:flex;gap:8px;align-items:center;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px}
+.ap-item:hover{background:var(--navy-soft)}
+.ai-n{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ai-r{font-family:'Kanit';color:var(--grey);font-size:11.5px;white-space:nowrap}
+.ap-none{padding:8px;text-align:center;color:var(--grey);font-size:12.5px}
+.props3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media(max-width:860px){.props3{grid-template-columns:1fr;gap:14px}}
+
 /* ===== Filters & table ===== */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
 .filters input,.filters select{border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
@@ -181,24 +207,30 @@ tbody tr:hover{background:var(--navy-soft)}
     <div class="tile"><div class="ic i-red">💰</div><div><div class="k">เบี้ยรวม (ไม่นับยกเลิก/ปฏิเสธ)</div><div class="v" id="stPremium">–</div></div></div>
   </div>
 
-  <div class="charts">
-    <div class="card">
-      <div class="sec-head"><h3>ใบสมัครแยกตามแผน</h3><span class="cnt" id="planTotal"></span></div>
-      <div id="planChart"></div>
-    </div>
-    <div class="card">
-      <div class="sec-head"><h3>สัดส่วน</h3></div>
-      <div class="prop-title">สถานะใบสมัคร</div>
-      <div class="prop-bar" id="statusBar"></div>
-      <div class="legend" id="statusLegend"></div>
-      <div class="prop-gap"></div>
-      <div class="prop-title">วิธีชำระเงิน</div>
-      <div class="prop-bar" id="payBar"></div>
-      <div class="legend" id="payLegend"></div>
-      <div class="prop-gap"></div>
-      <div class="prop-title">ช่วงอายุบุตร/หลาน</div>
-      <div class="prop-bar" id="ageBar"></div>
-      <div class="legend" id="ageLegend"></div>
+  <div class="card">
+    <div class="sec-head"><h3>ใบสมัครตามช่วงอายุ × แผน</h3><span class="cnt">แตะแผนเพื่อดูรายชื่อลูกค้า · แตะชื่อเพื่อเปิดรายละเอียด</span></div>
+    <div class="age-grid" id="agePlan"></div>
+    <div class="plan-sum" id="agePlanSum"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-head"><h3>สัดส่วน</h3></div>
+    <div class="props3">
+      <div>
+        <div class="prop-title">สถานะใบสมัคร</div>
+        <div class="prop-bar" id="statusBar"></div>
+        <div class="legend" id="statusLegend"></div>
+      </div>
+      <div>
+        <div class="prop-title">วิธีชำระเงิน</div>
+        <div class="prop-bar" id="payBar"></div>
+        <div class="legend" id="payLegend"></div>
+      </div>
+      <div>
+        <div class="prop-title">ช่วงอายุบุตร/หลาน</div>
+        <div class="prop-bar" id="ageBar"></div>
+        <div class="legend" id="ageLegend"></div>
+      </div>
     </div>
   </div>
 
@@ -326,7 +358,7 @@ async function loadData(){
     return;
   }
   APPS = data||[];
-  renderStats(); renderPlanChart(); renderProps(); renderDue(); renderTable();
+  renderStats(); renderAgePlan(); renderProps(); renderDue(); renderTable();
 }
 
 function renderStats(){
@@ -338,27 +370,51 @@ function renderStats(){
   document.getElementById('stPremium').innerHTML    = fmt(active.reduce((s,a)=>s+(a.annual_premium||0),0))+' <small>บาท</small>';
 }
 
-function renderPlanChart(){
-  const cnt={1:0,2:0,3:0}, amt={1:0,2:0,3:0};
-  let totAmt=0;
-  APPS.forEach(a=>{
-    if(cnt[a.plan_id]===undefined) return;
-    cnt[a.plan_id]++;
-    if(!['REJECTED','CANCELLED'].includes(a.status)){
-      amt[a.plan_id]+=a.annual_premium||0;
-      totAmt+=a.annual_premium||0;
-    }
-  });
-  const max=Math.max(1,cnt[1],cnt[2],cnt[3]);
-  document.getElementById('planTotal').textContent='รวม '+fmt(APPS.length)+' ใบ';
-  document.getElementById('planChart').innerHTML=[1,2,3].map(i=>`
-    <div class="hb-row">
-      <span class="hb-lbl">Plus ${i}</span>
-      <div class="hb-track"><div class="hb-fill" style="width:${cnt[i]/max*100}%"></div></div>
-      <span class="hb-val">${fmt(cnt[i])} ใบ</span>
-      <span class="hb-amt">${fmt(amt[i])} บ.</span>
-    </div>`).join('')
-    +`<div class="plan-sum"><span>ยอดรวมทั้งหมด (ไม่นับยกเลิก/ปฏิเสธ)</span><span class="ps-v">${fmt(APPS.length)} ใบ · ${fmt(totAmt)} บาท</span></div>`;
+const AGE_META={
+  INFANT: {i:'👶', t:'เบบี๋ · 15 วัน – <1 ปี'},
+  TODDLER:{i:'🧒', t:'วัยซน · 1 – 5 ปี'},
+  KID:    {i:'🎒', t:'วัยเรียน · 6 – 20 ปี'},
+};
+const activeApp=a=>!['REJECTED','CANCELLED'].includes(a.status);
+const sumAmt=arr=>arr.filter(activeApp).reduce((s,a)=>s+(a.annual_premium||0),0);
+function renderAgePlan(){
+  const G={INFANT:{1:[],2:[],3:[]},TODDLER:{1:[],2:[],3:[]},KID:{1:[],2:[],3:[]}};
+  APPS.forEach(a=>{ if(G[a.age_group]&&G[a.age_group][a.plan_id]) G[a.age_group][a.plan_id].push(a); });
+  document.getElementById('agePlan').innerHTML=Object.entries(G).map(([k,plans])=>{
+    const all=[...plans[1],...plans[2],...plans[3]];
+    return `<div class="age-col">
+      <div class="age-head">
+        <span class="ae">${AGE_META[k].i}</span>
+        <div>
+          <div class="at">${AGE_META[k].t}</div>
+          <div class="as">${fmt(all.length)} ใบ · <b>${fmt(sumAmt(all))} บาท</b></div>
+        </div>
+      </div>
+      ${[1,2,3].map(pid=>{
+        const arr=plans[pid], lid='ap-'+k+'-'+pid;
+        return `<button class="plan-row" id="pr-${lid}" onclick="toggleAP('${lid}')">
+          <span class="pr-n">Plus ${pid}</span>
+          <span class="pr-c">${fmt(arr.length)} ใบ</span>
+          <span class="pr-a">${fmt(sumAmt(arr))} บ.</span>
+          <span class="pr-x">▾</span>
+        </button>
+        <div class="ap-list" id="${lid}">${arr.length?arr.map(a=>{
+          const ap=one(a.applicants)||{};
+          return `<div class="ap-item" onclick="openModal(${a.app_id})">
+            <span class="ai-n">${ap.full_name||'–'}</span>
+            <span class="ai-r">${a.ref_no}</span>
+            ${badge(a.status)}
+          </div>`;
+        }).join(''):'<div class="ap-none">ยังไม่มีใบสมัคร</div>'}</div>`;
+      }).join('')}
+    </div>`;
+  }).join('');
+  document.getElementById('agePlanSum').innerHTML=
+    `<span>ยอดรวมทั้งหมด (ไม่นับยกเลิก/ปฏิเสธ)</span><span class="ps-v">${fmt(APPS.length)} ใบ · ${fmt(sumAmt(APPS))} บาท</span>`;
+}
+function toggleAP(id){
+  document.getElementById(id).classList.toggle('open');
+  document.getElementById('pr-'+id).classList.toggle('open');
 }
 
 /* แถบสัดส่วน 100% + legend (จุดสี+ป้ายชื่อ+จำนวน — ไม่พึ่งสีอย่างเดียว) */
