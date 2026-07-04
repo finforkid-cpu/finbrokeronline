@@ -426,10 +426,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
     <div class="form-sec-title" style="margin-top:22px"><span class="n">3</span>ที่อยู่สำหรับจัดส่งกรมธรรม์</div>
     <div class="fgrid">
       <div class="fld full"><label>ที่อยู่ <span class="req">*</span></label><textarea id="addr" rows="2" placeholder="บ้านเลขที่ หมู่บ้าน ซอย ถนน"></textarea><div class="err">กรุณากรอกที่อยู่</div></div>
-      <div class="fld"><label>จังหวัด <span class="req">*</span></label><input id="prov" placeholder="เช่น กรุงเทพมหานคร"><div class="err">กรุณากรอกจังหวัด</div></div>
-      <div class="fld"><label>อำเภอ/เขต <span class="req">*</span></label><input id="amph" placeholder="เช่น บางรัก"><div class="err">กรุณากรอกอำเภอ/เขต</div></div>
-      <div class="fld"><label>ตำบล/แขวง <span class="req">*</span></label><input id="tmb" placeholder="เช่น สีลม"><div class="err">กรุณากรอกตำบล/แขวง</div></div>
-      <div class="fld"><label>รหัสไปรษณีย์ <span class="req">*</span></label><input id="zip" inputmode="numeric" maxlength="5" placeholder="10500"><div class="err">กรุณากรอกรหัสไปรษณีย์ 5 หลัก</div></div>
+      <div class="fld"><label>จังหวัด <span class="req">*</span></label><select id="prov" onchange="onProvince()"><option value="">— เลือกจังหวัด —</option></select><div class="err">กรุณาเลือกจังหวัด</div></div>
+      <div class="fld"><label>อำเภอ/เขต <span class="req">*</span></label><select id="amph" onchange="onAmphure()" disabled><option value="">— เลือกอำเภอ/เขต —</option></select><div class="err">กรุณาเลือกอำเภอ/เขต</div></div>
+      <div class="fld"><label>ตำบล/แขวง <span class="req">*</span></label><select id="tmb" onchange="onTambon()" disabled><option value="">— เลือกตำบล/แขวง —</option></select><div class="err">กรุณาเลือกตำบล/แขวง</div></div>
+      <div class="fld"><label>รหัสไปรษณีย์ <span class="req">*</span></label><input id="zip" readonly placeholder="เติมอัตโนมัติ" style="background:var(--navy-soft)"><div class="err">กรุณาเลือกตำบล/แขวงก่อน</div></div>
     </div>
 
     <div class="note-navy" style="margin-top:16px">
@@ -523,8 +523,74 @@ async function loadPremiums(){
   }catch(e){ console.warn('โหลดเบี้ยจากฐานข้อมูลไม่สำเร็จ ใช้ค่าในหน้าเว็บแทน', e); }
 }
 
-/* ===== ที่อยู่: กรอกอิสระทุกช่อง ===== */
-function fldVal(id){ return document.getElementById(id).value.trim(); }
+/* ===== ที่อยู่: จังหวัด → อำเภอ/เขต → ตำบล/แขวง → รหัสไปรษณีย์อัตโนมัติ ===== */
+let provReady=null;
+function initAddress(){
+  if(!provReady) provReady=(async()=>{
+    try{
+      const {data,error}=await sb.from('thai_provinces').select('id,name_th').order('name_th');
+      if(error||!data||!data.length) return;
+      document.getElementById('prov').innerHTML='<option value="">— เลือกจังหวัด —</option>'+
+        data.map(p=>`<option value="${p.id}">${p.name_th}</option>`).join('');
+    }catch(e){ console.warn('โหลดรายชื่อจังหวัดไม่สำเร็จ',e); }
+  })();
+  return provReady;
+}
+function resetSelect(id,label){
+  const el=document.getElementById(id);
+  el.innerHTML=`<option value="">— ${label} —</option>`;
+  el.disabled=true;
+}
+async function onProvince(){
+  resetSelect('amph','เลือกอำเภอ/เขต');
+  resetSelect('tmb','เลือกตำบล/แขวง');
+  document.getElementById('zip').value='';
+  const pid=+document.getElementById('prov').value;
+  if(!pid) return;
+  const {data,error}=await sb.from('thai_districts').select('id,name_th').eq('province_id',pid).order('name_th');
+  if(error||!data) return;
+  const el=document.getElementById('amph');
+  el.innerHTML='<option value="">— เลือกอำเภอ/เขต —</option>'+data.map(d=>`<option value="${d.id}">${d.name_th}</option>`).join('');
+  el.disabled=false;
+}
+async function onAmphure(){
+  resetSelect('tmb','เลือกตำบล/แขวง');
+  document.getElementById('zip').value='';
+  const did=+document.getElementById('amph').value;
+  if(!did) return;
+  const {data,error}=await sb.from('thai_sub_districts').select('id,name_th,zip_code').eq('district_id',did).order('name_th');
+  if(error||!data) return;
+  const el=document.getElementById('tmb');
+  el.innerHTML='<option value="">— เลือกตำบล/แขวง —</option>'+data.map(t=>`<option value="${t.id}" data-zip="${t.zip_code}">${t.name_th}</option>`).join('');
+  el.disabled=false;
+}
+function onTambon(){
+  const el=document.getElementById('tmb');
+  const zip=el.selectedOptions[0]?.dataset.zip||'';
+  const zipEl=document.getElementById('zip');
+  zipEl.value=zip;
+  if(zip) zipEl.closest('.fld').classList.remove('invalid');
+}
+function selText(id){ const el=document.getElementById(id); return el.value?(el.selectedOptions[0]?.text||''):''; }
+
+/* กู้ค่าที่อยู่จากร่าง: ต้องไล่โหลดตัวเลือกทีละชั้นก่อนตั้งค่า */
+async function restoreAddress(f){
+  if(!f.prov) return;
+  await initAddress();
+  const prov=document.getElementById('prov');
+  prov.value=f.prov;
+  if(prov.value!==f.prov) return;
+  await onProvince();
+  if(!f.amph) return;
+  const amph=document.getElementById('amph');
+  amph.value=f.amph;
+  if(amph.value!==f.amph) return;
+  await onAmphure();
+  if(!f.tmb) return;
+  const tmb=document.getElementById('tmb');
+  tmb.value=f.tmb;
+  if(tmb.value===f.tmb) onTambon();
+}
 
 /* ===== บันทึกร่างอัตโนมัติ: ปิดหน้าแล้วกลับมา ข้อมูลยังอยู่ ===== */
 const DRAFT_KEY='ffk_draft_v1';
@@ -547,7 +613,9 @@ function restoreDraft(){
     if(d.age) pickAge(d.age);                 // ต้องมาก่อน เพราะ pickAge ล้าง state.plan
     if(d.plan) state.plan=d.plan;
     if(d.payMode) state.payMode=d.payMode;
-    Object.entries(d.f||{}).forEach(([id,v])=>{ const el=document.getElementById(id); if(el) el.value=v; });
+    const ADDR_IDS=['prov','amph','tmb','zip']; // dropdown ที่อยู่กู้แยกแบบ async
+    Object.entries(d.f||{}).forEach(([id,v])=>{ const el=document.getElementById(id); if(el&&!ADDR_IDS.includes(id)) el.value=v; });
+    restoreAddress(d.f||{});
     let s=d.step||1;
     if(s>1&&!(d.age&&d.plan)) s=1;
     if(s>4) s=4;                               // ไม่กู้กลับไปหน้าขอบคุณ
@@ -909,9 +977,9 @@ async function submitApp(){
   ok&=mark('cCid',validCid(document.getElementById('cCid').value.trim()));
   ok&=(state.docs.birthCert?true:(document.getElementById('upBirth').closest('.fld').classList.add('invalid'),false));
   ok&=mark('addr',document.getElementById('addr').value.trim().length>8);
-  ok&=mark('prov',fldVal('prov').length>=2);
-  ok&=mark('amph',fldVal('amph').length>=2);
-  ok&=mark('tmb',fldVal('tmb').length>=2);
+  ok&=mark('prov',!!document.getElementById('prov').value);
+  ok&=mark('amph',!!document.getElementById('amph').value);
+  ok&=mark('tmb',!!document.getElementById('tmb').value);
   ok&=mark('zip',/^\d{5}$/.test(document.getElementById('zip').value.trim()));
   if(!document.getElementById('consent').checked){ alert('กรุณาติ๊กยอมรับคำรับรองและความยินยอม PDPA ก่อนยืนยันทำประกัน'); return; }
   if(!ok){
@@ -956,9 +1024,9 @@ async function submitApp(){
       },
       address:{
         address_text:document.getElementById('addr').value.trim(),
-        sub_district:fldVal('tmb'),
-        district:fldVal('amph'),
-        province:fldVal('prov'),
+        sub_district:selText('tmb'),
+        district:selText('amph'),
+        province:selText('prov'),
         postal_code:document.getElementById('zip').value.trim(),
       },
       documents:{
@@ -1003,7 +1071,13 @@ setInterval(tickClock,1000);
 renderAges();
 goStep(1);
 loadPremiums();
-DRAFT_FIELDS.forEach(id=>document.getElementById(id)?.addEventListener('input',saveDraft));
+initAddress();
+DRAFT_FIELDS.forEach(id=>{
+  const el=document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('input',saveDraft);
+  el.addEventListener('change',saveDraft); // dropdown ที่อยู่ยิง change ไม่ยิง input
+});
 restoreDraft();
 </script>
 </body>
