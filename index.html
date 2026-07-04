@@ -262,6 +262,41 @@ body.has-ab .wrap{padding-bottom:185px}
 .cf{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;pointer-events:none;opacity:.9;animation:cfFall 3s linear forwards}
 @keyframes cfFall{0%{transform:translateY(0) rotate(0)}100%{transform:translateY(600px) rotate(560deg);opacity:0}}
 
+/* ===== ใบยืนยันทำประกัน (เรนเดอร์นอกจอเพื่อแปลงเป็นภาพ) ===== */
+.cert{width:760px;background:#fff;font-family:'Anuphan',sans-serif;color:#2A2D3A;border:1px solid #E4E6ED}
+.ct-head{background:var(--fin-red);color:#fff;padding:20px 28px;display:flex;justify-content:space-between;align-items:center}
+.ct-logo{font-family:'Kanit';font-weight:700;font-size:30px;line-height:1}
+.ct-logo small{display:block;font-size:10px;letter-spacing:2px;font-weight:600}
+.ct-title{text-align:right;font-family:'Kanit'}
+.ct-title .t1{font-size:19px;font-weight:600}
+.ct-title .t2{font-size:12px;opacity:.9}
+.ct-ref{display:flex;justify-content:space-between;background:var(--navy);color:#fff;padding:9px 28px;font-family:'Kanit';font-size:13.5px}
+.ct-body{padding:6px 28px 20px}
+.ct-body h4{font-family:'Kanit';color:var(--navy);font-size:15px;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.ct-body h4::before{content:'';width:4px;height:16px;background:var(--fin-red);border-radius:2px}
+.cert table{width:100%;border-collapse:collapse;font-size:13.5px}
+.cert td{border:1px solid #E4E6ED;padding:7px 12px}
+.c-l{width:62%}
+.c-l.ind{padding-left:26px;color:var(--grey)}
+.c-v{font-family:'Kanit';font-weight:600;color:var(--navy);text-align:right}
+.c-sec{background:var(--navy-soft);color:var(--navy);font-family:'Kanit';font-weight:600;font-size:13px}
+.c-total .c-l{font-family:'Kanit';font-weight:600}
+.c-total .c-v{color:var(--fin-red);font-size:16px}
+.c-dzwrap{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.c-dz{font-size:12px;border:1px solid #E4E6ED;border-radius:99px;padding:3px 10px;background:#fff}
+.c-note{background:#FFF7E6;border-left:4px solid #B78103;font-size:12.5px;padding:8px 12px;border-radius:6px;margin-top:8px;color:#7A5200}
+.ct-agent{background:var(--fin-red-soft);border:1.5px dashed var(--fin-red);border-radius:12px;padding:14px 16px;margin-top:20px;font-size:13.5px;line-height:1.7}
+.ct-agent b{color:var(--fin-red)}
+.ct-foot{padding:11px 28px;border-top:1px solid #E4E6ED;font-size:11px;color:var(--grey);display:flex;justify-content:space-between}
+
+/* ตัวดูภาพใบยืนยัน */
+.cert-view{position:fixed;inset:0;background:rgba(27,20,100,.55);z-index:30;display:none;overflow-y:auto;padding:20px 12px}
+.cert-view.show{display:block}
+.cv-in{max-width:520px;margin:0 auto;text-align:center}
+.cv-hint{color:#fff;font-size:13px;margin-bottom:10px}
+.cert-view img{width:100%;border-radius:10px;box-shadow:0 10px 40px rgba(0,0,0,.35)}
+.cert-view .btn{width:auto}
+
 /* ===== Reduced motion ===== */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
@@ -515,11 +550,25 @@ body.has-ab .wrap{padding-bottom:185px}
       <div class="st"><span class="b">2</span><span>เมื่อบริษัทฯ อนุมัติ กรมธรรม์จะถูกจัดส่งทางอีเมลและที่อยู่ที่ระบุไว้</span></div>
       <div class="st"><span class="b">3</span><span>ความคุ้มครองการเจ็บป่วยตามโรคที่ระบุ เริ่มเมื่อพ้น<b>ระยะรอคอย 15 วัน</b>นับจากวันที่กรมธรรม์มีผลบังคับ</span></div>
     </div>
-    <button class="btn line-btn" style="max-width:340px;margin:18px auto 0" onclick="alert('เชื่อมต่อ LINE OA @finforkids')">💬 สอบถาม/ติดตามสถานะทาง LINE @finforkids</button>
+    <button class="btn btn-navy" id="certBtn" style="max-width:340px;margin:16px auto 0" onclick="downloadCert()">📄 ดาวน์โหลดใบยืนยันทำประกัน (ไฟล์ภาพ)</button>
+    <button class="btn line-btn" style="max-width:340px;margin:10px auto 0" onclick="alert('เชื่อมต่อ LINE OA @finforkids')">💬 สอบถาม/ติดตามสถานะทาง LINE @finforkids</button>
   </div>
 </section>
 
 </main>
+
+<div id="certHost" style="position:fixed;left:-10000px;top:0;z-index:-1" aria-hidden="true"></div>
+
+<div class="cert-view" id="certView" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="cv-in">
+    <div class="cv-hint">📌 กดค้างที่ภาพเพื่อบันทึกลงเครื่อง หรือแตะปุ่มดาวน์โหลดด้านล่าง</div>
+    <img id="certImg" alt="ใบยืนยันทำประกัน">
+    <div style="display:flex;gap:10px;justify-content:center;margin-top:12px">
+      <a class="btn btn-red" id="certDl">⬇️ ดาวน์โหลด</a>
+      <button class="btn btn-outline" onclick="document.getElementById('certView').classList.remove('show')">ปิด</button>
+    </div>
+  </div>
+</div>
 
 <div class="action-bar" id="actionBar">
   <button class="ab-back" id="abBack" onclick="abBackFn&&abBackFn()">‹ กลับ</button>
@@ -1109,6 +1158,92 @@ async function sendLineFlex(refNo,planName,annual,payText,firstAmt){
   if(LIFF_DEBUG) alert('⚠️ ไม่ได้ส่ง Flex — '+why);
 }
 
+/* ================= ใบยืนยันทำประกัน (ไฟล์ภาพ) ================= */
+let lastApp=null;
+function buildCertHTML(L){
+  const p=PLANS[L.plan];
+  const ag=AGE_GROUPS.find(a=>a.key===L.age);
+  const now=new Date();
+  const covRows=COV_ROWS.map(r=>r.sec
+    ?`<tr><td colspan="2" class="c-sec">${r.sec}</td></tr>`
+    :`<tr><td class="c-l${r.ind?' ind':''}">${r.ind?'• ':''}${r.l}</td><td class="c-v">${r.v(p)}</td></tr>`).join('');
+  const infant=L.age==='infant';
+  const dz=DISEASES.filter(d=>infant?d.infant:true).map(d=>`<span class="c-dz">✔ ${d.th}</span>`).join('');
+  let payRows,payNote='';
+  if(L.payMode==='full'){
+    payRows=`<tr><td class="c-l">ชำระเบี้ยเต็มจำนวน</td><td class="c-v">${fmt(L.annual)} บาท · ✓ ชำระแล้ว</td></tr>`;
+  }else{
+    payRows=L.schedule.map((v,i)=>{
+      const d=new Date(); d.setMonth(d.getMonth()+i);
+      const due=i===0?'ชำระแล้ววันนี้':'ครบกำหนด '+d.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'});
+      return `<tr><td class="c-l">งวดที่ ${i+1} จาก ${L.schedule.length}${i===0?' ✓':''}</td><td class="c-v">${fmt(v)} บาท · ${due}</td></tr>`;
+    }).join('');
+    payNote=`<div class="c-note">📱 แต่ละงวดจะมี SMS แจ้งเตือนพร้อมลิงก์ชำระเงินส่งถึงท่านก่อนวันครบกำหนด — กรุณาชำระผ่านช่องทางของ <b>บจก. ฟิน อินชัวรันส์ โบรคเกอร์ เท่านั้น</b></div>`;
+  }
+  return `<div class="cert">
+    <div class="ct-head">
+      <div class="ct-logo">FIN<small>INSURANCE&nbsp;BROKER</small></div>
+      <div class="ct-title"><div class="t1">ใบยืนยันการรับคำขอเอาประกันภัย</div><div class="t2">ประกันภัยโรคสุดฮิต FIN FOR KIDS PLUS · รับประกันภัยโดย MSIG</div></div>
+    </div>
+    <div class="ct-ref"><span>เลขอ้างอิงคำขอ: ${L.refNo}</span><span>วันที่รับคำขอ: ${now.toLocaleDateString('th-TH',{day:'numeric',month:'long',year:'numeric'})}</span></div>
+    <div class="ct-body">
+      <h4>ผู้ขอเอาประกันภัย</h4>
+      <table>
+        <tr><td class="c-l">ผู้ปกครอง (ผู้เอาประกันภัยหลัก)</td><td class="c-v">${L.parentName}</td></tr>
+        <tr><td class="c-l">เบอร์โทรศัพท์</td><td class="c-v">${L.phone}</td></tr>
+        <tr><td class="c-l">บุตร/หลาน (ผู้อยู่ในอุปการะ)</td><td class="c-v">ช่วงอายุ ${ag.label} · ตามสูติบัตรที่แนบ</td></tr>
+      </table>
+      <h4>แผนความคุ้มครอง — ${p.name}</h4>
+      <table>${covRows}
+        <tr class="c-total"><td class="c-l">เบี้ยประกันภัยรายปี (รวมอากรแสตมป์)</td><td class="c-v">${fmt(L.annual)} บาท</td></tr>
+      </table>
+      <h4>โรคที่ได้รับความคุ้มครอง (${infant?'5':'8'} โรค)</h4>
+      <div class="c-dzwrap">${dz}</div>
+      <div class="c-note">ระยะรอคอย (Waiting Period) 15 วันสำหรับการเจ็บป่วยตามโรคที่ระบุ นับจากวันเริ่มต้นความคุ้มครอง</div>
+      <h4>การชำระเงิน — ${L.payMode==='full'?'ชำระเต็มจำนวน':'ผ่อนชำระ '+L.schedule.length+' งวด 0% ไม่มีดอกเบี้ย'}</h4>
+      <table>${payRows}</table>
+      ${payNote}
+      <div class="ct-agent">
+        🕐 <b>ตัวแทนพร้อมดูแลตลอด 24 ชั่วโมง ผ่านช่องทาง LINE นี้</b><br>
+        ช่วยประสานงานขอ<b>ส่วนลดค่าห้องและค่ารักษาพยาบาล</b>ให้กับลูกค้า — เมื่อเข้ารับการรักษา อย่าลืมติดต่อแจ้ง<b>ชื่อโรงพยาบาลและเลขห้อง</b>ได้เลยค่ะ 💬 LINE: @finforkids
+      </div>
+    </div>
+    <div class="ct-foot">
+      <span>เอกสารนี้เป็นการยืนยันการรับคำขอเอาประกันภัย มิใช่กรมธรรม์ประกันภัย · กรมธรรม์จะจัดส่งเมื่อบริษัทฯ อนุมัติ</span>
+      <span>www.finforkids.com</span>
+    </div>
+  </div>`;
+}
+async function downloadCert(){
+  if(!lastApp){ alert('ไม่พบข้อมูลใบสมัคร กรุณาทำรายการใหม่'); return; }
+  const btn=document.getElementById('certBtn');
+  btn.disabled=true; btn.textContent='⏳ กำลังสร้างใบยืนยัน...';
+  try{
+    if(!window.html2canvas){
+      await new Promise((res,rej)=>{
+        const s=document.createElement('script');
+        s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+        s.onload=res; s.onerror=rej; document.head.appendChild(s);
+      });
+    }
+    const host=document.getElementById('certHost');
+    host.innerHTML=buildCertHTML(lastApp);
+    await new Promise(r=>setTimeout(r,150)); // รอฟอนต์/เลย์เอาต์นิ่งก่อนถ่ายภาพ
+    const canvas=await html2canvas(host.firstElementChild,{scale:2,backgroundColor:'#ffffff'});
+    const url=canvas.toDataURL('image/png');
+    const dl=document.getElementById('certDl');
+    document.getElementById('certImg').src=url;
+    dl.href=url; dl.setAttribute('download','ใบยืนยันทำประกัน-'+lastApp.refNo+'.png');
+    document.getElementById('certView').classList.add('show');
+    host.innerHTML='';
+  }catch(e){
+    console.error(e);
+    alert('สร้างไฟล์ภาพไม่สำเร็จ กรุณาลองใหม่อีกครั้ง');
+  }finally{
+    btn.disabled=false; btn.textContent='📄 ดาวน์โหลดใบยืนยันทำประกัน (ไฟล์ภาพ)';
+  }
+}
+
 let submitting=false;
 async function submitApp(){
   if(submitting) return;
@@ -1184,6 +1319,11 @@ async function submitApp(){
     // 3) แสดงผลจากเซิร์ฟเวอร์ (เลขอ้างอิง/ยอดจริง)
     const p=PLANS[state.plan];
     const payText=state.payMode==='full'?'ชำระเต็มจำนวน':'ผ่อน '+state.payMode+' งวด 0%';
+    lastApp={refNo:data.ref_no,plan:state.plan,age:state.age,payMode:state.payMode,
+      schedule:(data.schedule&&data.schedule.length?data.schedule:state.schedule),
+      annual:data.annual_premium,first:data.first_amount,
+      parentName:document.getElementById('pName').value.trim(),
+      phone:document.getElementById('pTel').value.trim()};
     document.getElementById('refNo').textContent=data.ref_no;
     document.getElementById('thanksSum').innerHTML=`${p.name} · เบี้ยรายปี ${fmt(data.annual_premium)} บาท · ${payText} · ชำระงวดแรกแล้ว ${fmt(data.first_amount)} บาท`;
 
