@@ -96,12 +96,15 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .choice .d{font-size:13px;color:var(--grey)}
 .choice .tag{display:inline-block;margin-top:8px;font-size:12px;background:var(--navy-soft);color:var(--navy);border-radius:99px;padding:2px 10px;font-weight:600}
 
-.plan-card{border:2px solid var(--line);border-radius:14px;background:#fff;overflow:hidden;transition:.2s;display:flex;flex-direction:column}
+.plan-card{border:2px solid var(--line);border-radius:18px;background:#fff;overflow:hidden;transition:.2s;display:flex;flex-direction:column;box-shadow:0 4px 14px rgba(27,20,100,.06);cursor:pointer}
 .plan-card:hover{border-color:var(--fin-red);transform:translateY(-2px)}
 .plan-card:active{transform:scale(.98)}
-.plan-card.selected{border-color:var(--fin-red);box-shadow:0 0 0 4px var(--fin-red-soft)}
-.plan-head{background:var(--navy);color:#fff;font-family:'Kanit';font-weight:600;text-align:center;padding:10px;font-size:15px}
-.plan-card.hot .plan-head{background:var(--fin-red)}
+.plan-card.selected{border-color:var(--fin-red);background:var(--fin-red-soft);box-shadow:0 0 0 4px var(--fin-red-soft)}
+.p-ic{font-size:38px;line-height:1;text-align:center;margin-top:16px}
+.p-name{font-family:'Kanit';font-weight:600;color:var(--navy);text-align:center;font-size:16px;margin-top:6px}
+.p-stars{text-align:center;color:#F6B93B;font-size:15px;letter-spacing:3px;margin-top:2px}
+.p-stars .dim{color:#DDE0E9}
+.btn-ok{background:var(--ok);color:#fff}
 .plan-body{padding:14px;text-align:center;flex:1;display:flex;flex-direction:column;gap:6px}
 .plan-price{font-family:'Kanit';font-weight:700;color:var(--fin-red);font-size:26px;line-height:1.1}
 .plan-price small{font-size:13px;color:var(--grey);font-weight:500;font-family:'Anuphan'}
@@ -225,6 +228,18 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .next-steps .st .b{width:22px;height:22px;border-radius:50%;background:var(--fin-red);color:#fff;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px;font-family:'Kanit'}
 .line-btn{background:#06C755;color:#fff}
 .line-btn:hover{background:#05B24C}
+
+/* ===== Action bar (แถบปุ่มลอยด้านล่าง มือถือ) ===== */
+.action-bar{position:fixed;left:0;right:0;bottom:0;z-index:6;background:#fff;border-top:1px solid var(--line);box-shadow:0 -6px 22px rgba(27,20,100,.12);padding:6px 14px calc(8px + env(safe-area-inset-bottom));display:none;border-radius:18px 18px 0 0}
+.ab-back{background:none;border:none;color:var(--grey);font-size:13.5px;font-weight:500;padding:4px 0;display:block}
+.ab-back:active{color:var(--fin-red)}
+.ab-row{display:flex;justify-content:space-between;align-items:center;margin:2px 0 8px}
+.ab-plan{font-size:13.5px;color:var(--navy);font-weight:600}
+.ab-price{font-family:'Kanit';font-weight:700;color:var(--fin-red);font-size:19px}
+.action-bar .btn{min-height:48px}
+.ab-brand{text-align:center;font-family:'Kanit';font-weight:600;font-size:10.5px;color:var(--fin-red);margin-top:6px}
+body.has-ab .ribbon{display:none}
+body.has-ab .wrap{padding-bottom:185px}
 
 /* ===== Footer ribbon (signature CI) ===== */
 .ribbon{position:fixed;bottom:0;left:0;right:0;background:var(--fin-red);color:#fff;font-family:'Kanit';font-weight:600;display:flex;justify-content:space-between;align-items:center;padding:9px 20px;font-size:14.5px;z-index:5;border-radius:22px 22px 0 0}
@@ -506,6 +521,13 @@ input,select,textarea{font-family:inherit;font-size:16px}
 
 </main>
 
+<div class="action-bar" id="actionBar">
+  <button class="ab-back" id="abBack" onclick="abBackFn&&abBackFn()">‹ กลับ</button>
+  <div class="ab-row"><span class="ab-plan" id="abPlan"></span><span class="ab-price" id="abPrice"></span></div>
+  <button class="btn btn-red" id="abCta" onclick="abCtaFn&&abCtaFn()"></button>
+  <div class="ab-brand">เรื่องประกัน ✓ เราชัดเจน · www.finforkids.com</div>
+</div>
+
 <footer class="ribbon"><span>เรื่องประกัน ✓ เราชัดเจน</span><span class="web">www.finforkids.com</span></footer>
 
 <script>
@@ -656,7 +678,7 @@ function restoreDraft(){
     draftReady=true;
     if(!d) return;
     if(d.age) pickAge(d.age);                 // ต้องมาก่อน เพราะ pickAge ล้าง state.plan
-    if(d.plan) state.plan=d.plan;
+    if(d.plan){ state.plan=d.plan; if(d.age) renderPlans(); }
     if(d.payMode) state.payMode=d.payMode;
     const ADDR_IDS=['prov','amph','tmb','zip']; // dropdown ที่อยู่กู้แยกแบบ async
     Object.entries(d.f||{}).forEach(([id,v])=>{ const el=document.getElementById(id); if(el&&!ADDR_IDS.includes(id)) el.value=v; });
@@ -664,7 +686,7 @@ function restoreDraft(){
     let s=d.step||1;
     if(s>1&&!(d.age&&d.plan)) s=1;
     if(s>4) s=4;                               // ไม่กู้กลับไปหน้าขอบคุณ
-    if(s>1) goStep(s);
+    if(s>1) goStep(s); else updateActionBar();
     window.scrollTo({top:0});
   }catch(e){}finally{ draftReady=true; }
 }
@@ -684,6 +706,7 @@ function goStep(n){
   if(n===2) renderStep2();
   if(n===3) renderStep3();
   if(n===5){ clearDraft(); burstConfetti(); } else saveDraft();
+  updateActionBar();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -716,11 +739,21 @@ function pickAge(k){
   state.age=k; state.plan=null; renderAges();
   const card=document.getElementById('planPickCard'); card.style.display='block';
   document.getElementById('planPickSub').textContent='เบี้ยประกันภัยรายปี (รวมอากรแสตมป์) สำหรับบุตร/หลานอายุ '+AGE_GROUPS.find(a=>a.key===k).label;
-  document.getElementById('planGrid').innerHTML=[1,2,3].map(i=>{
-    const p=PLANS[i];
-    return `<div class="plan-card ${i===3?'hot':''} ${state.plan===i?'selected':''}" style="position:relative">
+  renderPlans();
+  saveDraft();
+  updateActionBar();
+  card.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderPlans(){
+  const k=state.age, pg=document.getElementById('planGrid');
+  const sl=pg.scrollLeft; // คงตำแหน่งเลื่อนของ carousel มือถือไว้ตอน re-render
+  pg.innerHTML=[1,2,3].map(i=>{
+    const p=PLANS[i], sel=state.plan===i;
+    return `<div class="plan-card ${i===3?'hot':''} ${sel?'selected':''}" style="position:relative" onclick="pickPlan(${i})">
       ${i===3?'<span class="hot-badge">คุ้มครองสูงสุด</span>':''}
-      <div class="plan-head">${p.name}</div>
+      <div class="p-ic">🛡️</div>
+      <div class="p-name">${p.name}</div>
+      <div class="p-stars">${'★'.repeat(i)}<span class="dim">${'★'.repeat(3-i)}</span></div>
       <div class="plan-body">
         <div class="plan-price">${fmt(p.premium[k])} <small>บาท/ปี</small></div>
         <ul class="plan-feat">
@@ -728,14 +761,19 @@ function pickAge(k){
           <li>อุบัติเหตุครั้งละ ${fmt(p.accident)}.-</li>
           <li>OPD ครั้งละ ${fmt(p.opd)}.-</li>
         </ul>
-        <button class="btn ${i===3?'btn-red':'btn-navy'} btn-sm" style="width:100%;margin-top:8px" onclick="pickPlan(${i})">เลือกแผนนี้</button>
+        <button class="btn ${sel?'btn-ok':(i===3?'btn-red':'btn-navy')} btn-sm" style="width:100%;margin-top:8px" onclick="event.stopPropagation();pickPlan(${i})">${sel?'✓ เลือกแล้ว':'เลือกแผนนี้'}</button>
       </div></div>`;
   }).join('');
   renderPlanDots();
-  saveDraft();
-  card.scrollIntoView({behavior:'smooth',block:'start'});
+  pg.scrollLeft=sl;
 }
-function pickPlan(i){ state.plan=i; state.payMode=null; state.slipFile=null; goStep(2); }
+function pickPlan(i){
+  state.plan=i; state.payMode=null; state.slipFile=null;
+  renderPlans();
+  saveDraft();
+  if(window.matchMedia('(max-width:560px)').matches) updateActionBar(); // มือถือ: เลือกค้างไว้ ไปต่อด้วยแถบล่าง
+  else goStep(2);
+}
 
 /* จุดบอกตำแหน่งการ์ดแผน (มือถือเลื่อนซ้าย-ขวา) */
 function renderPlanDots(){
@@ -806,13 +844,38 @@ function renderCovMobile(){
     :`<div class="cov-row${r.ind?' ind':''}"><span class="cl">${r.l}</span><span class="cv">${r.v(p)}</span></div>`).join('');
   document.getElementById('covMobile').innerHTML=`
     <div class="ptabs">${tabs}</div>
-    ${rows}
-    <div class="prem-mb">
-      <div><div class="pk">เบี้ยรายปี (รวมอากรแสตมป์)</div><div class="pv">${fmt(p.premium[k])} <small>บาท</small></div></div>
-      <button class="btn btn-red btn-sm" onclick="pickPlan2(${i})">${state.plan===i?'✓ ใช้แผนนี้':'เลือกแผนนี้'}</button>
-    </div>`;
+    ${rows}`;
+  updateActionBar(); // ราคา+ปุ่มเลือกอยู่ที่แถบลอยด้านล่าง อัปเดตตามแท็บที่ดู
 }
 function setMPlan(i){ state.mPlan=i; renderCovMobile(); }
+
+/* ===== แถบปุ่มลอยด้านล่าง (มือถือ) ===== */
+let abCtaFn=null, abBackFn=null;
+function updateActionBar(){
+  const bar=document.getElementById('actionBar');
+  if(!bar) return;
+  let cfg=null;
+  if(window.matchMedia('(max-width:560px)').matches&&state.age){
+    if(curStep===1&&state.plan)
+      cfg={plan:state.plan,cta:'ไปขั้นตอนที่ 2 — ดูความคุ้มครอง ›',fn:()=>goStep(2)};
+    else if(curStep===2){
+      const i=state.mPlan||state.plan||1;
+      cfg={back:{t:'‹ กลับไปเลือกแผน',fn:()=>goStep(1)},plan:i,cta:'✓ ใช้แผนนี้ — ไปชำระเงิน',fn:()=>pickPlan2(i)};
+    }
+  }
+  if(!cfg){ bar.style.display='none'; document.body.classList.remove('has-ab'); return; }
+  const p=PLANS[cfg.plan];
+  abCtaFn=cfg.fn; abBackFn=cfg.back?cfg.back.fn:null;
+  const back=document.getElementById('abBack');
+  back.style.display=cfg.back?'block':'none';
+  if(cfg.back) back.textContent=cfg.back.t;
+  document.getElementById('abPlan').textContent='แผนที่เลือก · '+p.name.replace('Fin for Kids ','');
+  document.getElementById('abPrice').textContent=fmt(p.premium[state.age])+'.-/ปี';
+  document.getElementById('abCta').textContent=cfg.cta;
+  bar.style.display='block';
+  document.body.classList.add('has-ab');
+}
+window.addEventListener('resize',updateActionBar);
 
 /* ================= STEP 3 : PAYMENT ================= */
 function calcSchedule(total,mode){
