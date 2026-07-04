@@ -462,8 +462,6 @@ body.has-ab .wrap{padding-bottom:185px}
     <div class="form-sec-title"><span class="n">1</span>ผู้ปกครอง (ผู้เอาประกันภัยหลัก)</div>
     <div class="fgrid">
       <div class="fld"><label>ชื่อ-นามสกุล <span class="req">*</span></label><input id="pName" autocomplete="name" placeholder="เช่น สมชาย ใจดี"><div class="err">กรุณากรอกชื่อ-นามสกุล</div></div>
-      <div class="fld"><label>วัน/เดือน/ปีเกิด <span class="req">*</span></label><input id="pDob" type="date"><div class="err" id="pDobErr">ผู้เอาประกันภัยต้องมีอายุ 20 – 60 ปี</div></div>
-      <div class="fld"><label>เลขบัตรประชาชน 13 หลัก <span class="req">*</span></label><input id="pCid" inputmode="numeric" maxlength="13" placeholder="X-XXXX-XXXXX-XX-X"><div class="err">เลขบัตรประชาชนไม่ถูกต้อง</div></div>
       <div class="fld"><label>เบอร์โทรศัพท์ <span class="req">*</span></label><input id="pTel" type="tel" autocomplete="tel-national" inputmode="tel" maxlength="10" placeholder="08XXXXXXXX"><div class="err">กรุณากรอกเบอร์โทร 10 หลัก</div></div>
       <div class="fld"><label>อีเมล <span class="req">*</span></label><input id="pEmail" type="email" autocomplete="email" inputmode="email" placeholder="name@email.com"><div class="err">รูปแบบอีเมลไม่ถูกต้อง</div></div>
       <div class="fld"><label>อาชีพปัจจุบัน <span class="req">*</span></label><input id="pJob" placeholder="เช่น พนักงานบริษัท"><div class="hint">ต้องไม่เป็นอาชีพเสี่ยงสูงตามเงื่อนไขบริษัทฯ</div><div class="err">กรุณากรอกอาชีพ</div></div>
@@ -478,9 +476,6 @@ body.has-ab .wrap{padding-bottom:185px}
 
     <div class="form-sec-title" style="margin-top:22px"><span class="n">2</span>บุตร/หลาน (ผู้อยู่ในอุปการะ)</div>
     <div class="fgrid">
-      <div class="fld"><label>ชื่อ-นามสกุลบุตร/หลาน <span class="req">*</span></label><input id="cName" placeholder="เช่น ด.ช. ฟินดี ใจดี"><div class="err">กรุณากรอกชื่อบุตร/หลาน</div></div>
-      <div class="fld"><label>วัน/เดือน/ปีเกิดบุตร/หลาน <span class="req">*</span></label><input id="cDob" type="date"><div class="err" id="cDobErr">อายุไม่ตรงกับช่วงอายุของแผนที่เลือก</div></div>
-      <div class="fld full"><label>เลขบัตรประชาชนบุตร/หลาน <span class="req">*</span></label><input id="cCid" inputmode="numeric" maxlength="13" placeholder="X-XXXX-XXXXX-XX-X"><div class="err">เลขบัตรประชาชนไม่ถูกต้อง</div></div>
       <div class="fld full">
         <label>แนบสูติบัตร หรือบัตรประชาชนบุตร/หลาน <span class="req">*</span></label>
         <label class="upload small" id="upBirth"><input type="file" accept="image/*,.pdf" onchange="onDoc(this,'upBirth','birthCert')"><div class="up-t">📎 แตะเพื่อแนบสูติบัตร</div><div class="up-d">ภาพถ่าย หรือ PDF</div></label>
@@ -675,7 +670,7 @@ async function restoreAddress(f){
 
 /* ===== บันทึกร่างอัตโนมัติ: ปิดหน้าแล้วกลับมา ข้อมูลยังอยู่ ===== */
 const DRAFT_KEY='ffk_draft_v1';
-const DRAFT_FIELDS=['pName','pDob','pCid','pTel','pEmail','pJob','pHeight','pWeight','cName','cDob','cCid','addr','prov','amph','tmb','zip'];
+const DRAFT_FIELDS=['pName','pTel','pEmail','pJob','pHeight','pWeight','addr','prov','amph','tmb','zip'];
 let draftDone=false, draftReady=false; // ห้ามบันทึกจนกว่าจะกู้ร่างเก่าเสร็จ (กัน goStep(1) ตอน init เขียนทับ)
 function saveDraft(){
   if(draftDone||!draftReady) return;
@@ -1017,12 +1012,6 @@ function onDoc(inp,boxId,key){
   box.querySelector('.up-d').textContent=f.name+' · แตะเพื่อเปลี่ยนไฟล์';
   box.closest('.fld').classList.remove('invalid');
 }
-function validCid(id){
-  if(!/^\d{13}$/.test(id)) return false;
-  let s=0; for(let i=0;i<12;i++) s+=+id[i]*(13-i);
-  return (11-s%11)%10===+id[12];
-}
-function ageYears(dob){ return (Date.now()-new Date(dob).getTime())/(365.25*24*3600*1000); }
 function mark(id,ok){ document.getElementById(id).closest('.fld').classList.toggle('invalid',!ok); return ok; }
 
 /* อัปโหลดไฟล์เข้า Supabase Storage แล้วคืนข้อมูลไฟล์สำหรับ payload */
@@ -1108,22 +1097,12 @@ async function submitApp(){
   if(submitting) return;
   let ok=true;
   ok&=mark('pName',document.getElementById('pName').value.trim().length>2);
-  const pd=document.getElementById('pDob').value;
-  const pAge=pd?ageYears(pd):0;
-  ok&=mark('pDob',pd&&pAge>=20&&pAge<=60);
-  ok&=mark('pCid',validCid(document.getElementById('pCid').value.trim()));
   ok&=mark('pTel',/^0\d{9}$/.test(document.getElementById('pTel').value.trim()));
   ok&=mark('pEmail',/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(document.getElementById('pEmail').value.trim()));
   ok&=mark('pJob',document.getElementById('pJob').value.trim().length>1);
   ok&=mark('pHeight',+document.getElementById('pHeight').value>=100);
   ok&=mark('pWeight',+document.getElementById('pWeight').value>=25);
   ok&=(state.docs.pIdCard?true:(document.getElementById('upPid').closest('.fld').classList.add('invalid'),false));
-  ok&=mark('cName',document.getElementById('cName').value.trim().length>2);
-  const cd=document.getElementById('cDob').value;
-  const ag=AGE_GROUPS.find(a=>a.key===state.age);
-  const cAge=cd?ageYears(cd):-1;
-  ok&=mark('cDob',cd&&cAge>=ag.min&&cAge<ag.max);
-  ok&=mark('cCid',validCid(document.getElementById('cCid').value.trim()));
   ok&=(state.docs.birthCert?true:(document.getElementById('upBirth').closest('.fld').classList.add('invalid'),false));
   ok&=mark('addr',document.getElementById('addr').value.trim().length>8);
   ok&=mark('prov',!!document.getElementById('prov').value);
@@ -1158,19 +1137,13 @@ async function submitApp(){
       utm_source:new URLSearchParams(location.search).get('utm_source')||'web',
       parent:{
         full_name:document.getElementById('pName').value.trim(),
-        birth_date:pd,
-        citizen_id:document.getElementById('pCid').value.trim(),
         phone:document.getElementById('pTel').value.trim(),
         email:document.getElementById('pEmail').value.trim(),
         occupation:document.getElementById('pJob').value.trim(),
         height_cm:+document.getElementById('pHeight').value,
         weight_kg:+document.getElementById('pWeight').value,
       },
-      child:{
-        full_name:document.getElementById('cName').value.trim(),
-        birth_date:cd,
-        citizen_id:document.getElementById('cCid').value.trim(),
-      },
+      child:{},
       address:{
         address_text:document.getElementById('addr').value.trim(),
         sub_district:selText('tmb'),
