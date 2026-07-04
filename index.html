@@ -1090,8 +1090,8 @@ async function sendLineFlex(refNo,planName,annual,payText,firstAmt){
   try{
     if(!liffOk){ why=liffErr||'LIFF ยังไม่พร้อม (เปิดนอกแอป LINE?)'; }
     else if(!liff.isInClient()){ why='ไม่ได้เปิดในแอป LINE (isInClient=false)'; }
-    else if(!liff.isApiAvailable('sendMessages')){
-      why='sendMessages ใช้ไม่ได้ · บริบทที่เปิด: '+ctx()+' (ต้องเปิดจากห้องแชท และ LIFF ต้องมี scope chat_message.write)';
+    else if(!['utou','room','group'].includes(ctx())){
+      why='ไม่ได้เปิดจากห้องแชท จึงไม่มีปลายทางให้ส่ง · context='+ctx();
     }
     else{
       await liff.sendMessages([buildFlex(refNo,planName,annual,payText,firstAmt)]);
