@@ -76,7 +76,10 @@ input,select{font-family:inherit;font-size:15px}
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
 @media(max-width:760px){.charts{grid-template-columns:1fr}}
 .charts .card{margin-bottom:0}
-.hb-row{display:grid;grid-template-columns:56px 1fr 40px;align-items:center;gap:10px;margin-bottom:12px}
+.hb-row{display:grid;grid-template-columns:56px 1fr 48px 96px;align-items:center;gap:10px;margin-bottom:12px}
+.hb-amt{font-family:'Kanit';font-weight:600;font-size:13px;color:var(--fin-red);text-align:right;white-space:nowrap}
+.plan-sum{display:flex;justify-content:space-between;align-items:center;border-top:2px dashed var(--line);margin-top:6px;padding-top:12px;font-size:13.5px;color:var(--grey);font-weight:600}
+.plan-sum .ps-v{font-family:'Kanit';font-weight:700;font-size:16px;color:var(--fin-red)}
 .hb-lbl{font-size:13px;font-weight:600;text-align:right;color:var(--ink)}
 .hb-track{background:var(--bg);border-radius:6px;height:18px}
 .hb-fill{background:var(--navy);height:18px;border-radius:0 4px 4px 0;min-width:2px;transition:width .6s cubic-bezier(.22,.8,.36,1)}
@@ -192,6 +195,10 @@ tbody tr:hover{background:var(--navy-soft)}
       <div class="prop-title">วิธีชำระเงิน</div>
       <div class="prop-bar" id="payBar"></div>
       <div class="legend" id="payLegend"></div>
+      <div class="prop-gap"></div>
+      <div class="prop-title">ช่วงอายุบุตร/หลาน</div>
+      <div class="prop-bar" id="ageBar"></div>
+      <div class="legend" id="ageLegend"></div>
     </div>
   </div>
 
@@ -261,6 +268,11 @@ const PAY = {
   INST_4:{t:'ผ่อน 4 งวด', seg:'var(--c-blue)'},
   INST_6:{t:'ผ่อน 6 งวด', seg:'var(--c-red)'},
 };
+const AGE = {
+  INFANT: {t:'👶 15 วัน – <1 ปี', seg:'var(--c-indigo)'},
+  TODDLER:{t:'🧒 1 – 5 ปี',      seg:'var(--c-amber)'},
+  KID:    {t:'🎒 6 – 20 ปี',     seg:'var(--c-blue)'},
+};
 const badge = s => { const x=STATUS[s]||{t:s,c:'b-grey',i:''}; return `<span class="badge ${x.c}">${x.i} ${x.t}</span>`; };
 
 let APPS = [];
@@ -327,16 +339,26 @@ function renderStats(){
 }
 
 function renderPlanChart(){
-  const cnt={1:0,2:0,3:0};
-  APPS.forEach(a=>{ if(cnt[a.plan_id]!==undefined) cnt[a.plan_id]++; });
+  const cnt={1:0,2:0,3:0}, amt={1:0,2:0,3:0};
+  let totAmt=0;
+  APPS.forEach(a=>{
+    if(cnt[a.plan_id]===undefined) return;
+    cnt[a.plan_id]++;
+    if(!['REJECTED','CANCELLED'].includes(a.status)){
+      amt[a.plan_id]+=a.annual_premium||0;
+      totAmt+=a.annual_premium||0;
+    }
+  });
   const max=Math.max(1,cnt[1],cnt[2],cnt[3]);
   document.getElementById('planTotal').textContent='รวม '+fmt(APPS.length)+' ใบ';
   document.getElementById('planChart').innerHTML=[1,2,3].map(i=>`
     <div class="hb-row">
       <span class="hb-lbl">Plus ${i}</span>
       <div class="hb-track"><div class="hb-fill" style="width:${cnt[i]/max*100}%"></div></div>
-      <span class="hb-val">${fmt(cnt[i])}</span>
-    </div>`).join('');
+      <span class="hb-val">${fmt(cnt[i])} ใบ</span>
+      <span class="hb-amt">${fmt(amt[i])} บ.</span>
+    </div>`).join('')
+    +`<div class="plan-sum"><span>ยอดรวมทั้งหมด (ไม่นับยกเลิก/ปฏิเสธ)</span><span class="ps-v">${fmt(APPS.length)} ใบ · ${fmt(totAmt)} บาท</span></div>`;
 }
 
 /* แถบสัดส่วน 100% + legend (จุดสี+ป้ายชื่อ+จำนวน — ไม่พึ่งสีอย่างเดียว) */
@@ -350,12 +372,18 @@ function renderProp(barId,legendId,counts,meta){
     `<span class="li"><span class="dot" style="background:${meta[k].seg}"></span>${meta[k].t} <b>${n}</b> (${Math.round(n/total*100)}%)</span>`).join('');
 }
 function renderProps(){
-  const st={},py={};
-  APPS.forEach(a=>{ st[a.status]=(st[a.status]||0)+1; py[a.pay_mode]=(py[a.pay_mode]||0)+1; });
+  const st={},py={},ag={};
+  APPS.forEach(a=>{
+    st[a.status]=(st[a.status]||0)+1;
+    py[a.pay_mode]=(py[a.pay_mode]||0)+1;
+    ag[a.age_group]=(ag[a.age_group]||0)+1;
+  });
   renderProp('statusBar','statusLegend',
     Object.fromEntries(Object.keys(STATUS).map(k=>[k,st[k]||0])), STATUS);
   renderProp('payBar','payLegend',
     Object.fromEntries(Object.keys(PAY).map(k=>[k,py[k]||0])), PAY);
+  renderProp('ageBar','ageLegend',
+    Object.fromEntries(Object.keys(AGE).map(k=>[k,ag[k]||0])), AGE);
 }
 
 function renderDue(){
