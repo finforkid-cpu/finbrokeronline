@@ -136,6 +136,24 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .disease-list .dz .ck{color:var(--fin-red);font-weight:700}
 .disease-list .dz.off{opacity:.38}
 .disease-list .dz.off .ck{color:#aaa}
+/* ===== Mobile coverage view (แท็บเลือกแผน) ===== */
+.cov-mobile{display:none}
+.ptabs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:6px}
+.ptab{border:2px solid var(--line);border-radius:12px;padding:10px 4px;background:#fff;font-family:'Kanit';font-weight:600;font-size:14px;color:var(--navy);position:relative;transition:.2s}
+.ptab.on{border-color:var(--fin-red);background:var(--fin-red-soft);color:var(--fin-red)}
+.ptab .pp{display:block;font-size:10.5px;color:var(--grey);font-weight:500;font-family:'Anuphan';margin-top:2px}
+.ptab .mini-hot{position:absolute;top:-9px;right:-4px;background:var(--fin-red);color:#fff;font-size:9.5px;padding:1px 7px;border-radius:99px}
+.cov-sec{background:var(--navy-soft);color:var(--navy);font-family:'Kanit';font-weight:600;font-size:13px;border-radius:8px;padding:7px 10px;margin:12px 0 4px}
+.cov-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line);font-size:13.5px}
+.cov-row.ind{padding-left:16px;font-size:13px;color:var(--grey)}
+.cov-row .cl{flex:1}
+.cov-row .cv{font-family:'Kanit';font-weight:600;color:var(--navy);white-space:nowrap}
+.prem-mb{display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--fin-red-soft);border-radius:12px;padding:12px 14px;margin-top:14px}
+.prem-mb .pk{font-size:12px;color:var(--grey)}
+.prem-mb .pv{font-family:'Kanit';font-weight:700;font-size:22px;color:var(--fin-red);line-height:1.2}
+.prem-mb .pv small{font-size:12px;font-weight:500;color:var(--grey);font-family:'Anuphan'}
+.prem-mb .btn{width:auto;flex-shrink:0}
+
 .note-red{background:var(--fin-red-soft);border-left:4px solid var(--fin-red);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--ink);margin-top:14px}
 .note-navy{background:var(--navy-soft);border-left:4px solid var(--navy);border-radius:8px;padding:10px 14px;font-size:13px;margin-top:10px}
 
@@ -234,6 +252,8 @@ input,select,textarea{font-family:inherit;font-size:16px}
 @media(max-width:560px){
   .fgrid{grid-template-columns:1fr}
   .disease-list{grid-template-columns:1fr}
+  .table-scroll{display:none}
+  .cov-mobile{display:block}
   .stepper{padding:0 8px}
   .step .lbl{font-size:10.5px}
   .step-line{left:34px;right:34px}
@@ -314,6 +334,7 @@ input,select,textarea{font-family:inherit;font-size:16px}
     <div class="table-scroll">
       <table class="cov-table" id="covTable"></table>
     </div>
+    <div class="cov-mobile" id="covMobile"></div>
     <div class="note-red">🔴 <b>ระยะรอคอย (Waiting Period) 15 วัน</b> สำหรับการเจ็บป่วยตามโรคที่ระบุ นับจากวันเริ่มต้นความคุ้มครอง · OPD คุ้มครองสูงสุด 30 วันต่อปี หรือ 7 ครั้งต่อโรค · การเคลมโรคไข้หวัดใหญ่ ไข้เลือดออก RSV และโรคอื่นๆ ตามที่บริษัทร้องขอ ต้องแนบผลตรวจทางห้องปฏิบัติการ (Lab Report)</div>
   </div>
 
@@ -628,25 +649,34 @@ function scrollToPlan(i){
 }
 
 /* ================= STEP 2 ================= */
+/* รายการความคุ้มครอง — ใช้ร่วมกันทั้งตาราง (จอใหญ่) และมุมมองแท็บ (มือถือ) */
+const COV_ROWS=[
+  {sec:'ความคุ้มครองสำหรับผู้เอาประกันภัย (ผู้ปกครอง)'},
+  {l:'เสียชีวิต สูญเสียอวัยวะ สายตา หรือทุพพลภาพถาวรสิ้นเชิง (อบ.1)',v:()=>'500,000'},
+  {l:'ค่าปลงศพและค่าใช้จ่ายจัดการงานศพ (กรณีเจ็บป่วย รอคอย 180 วัน)',v:()=>'10,000'},
+  {sec:'ความคุ้มครองสำหรับบุตร/หลาน'},
+  {l:'ค่ารักษาพยาบาลจากอุบัติเหตุ ต่อครั้ง',v:p=>fmt(p.accident)},
+  {l:'ค่ารักษาผู้ป่วยใน (IPD) จ่ายตามจริง ต่อการเข้าพักรักษาครั้งใดครั้งหนึ่ง',v:p=>fmt(p.ipd)},
+  {l:'ค่าห้องปกติ ค่าอาหาร ค่าบริการพยาบาล สูงสุด/วัน',v:()=>'3,000',ind:true},
+  {l:'ค่าห้อง ICU และค่าบริการพยาบาล สูงสุด/วัน',v:()=>'6,000',ind:true},
+  {l:'ค่ารักษาผู้ป่วยนอก (OPD) ต่อครั้ง (สูงสุด 30 วัน/ปี, 7 ครั้ง/โรค)',v:p=>fmt(p.opd)},
+];
 function renderStep2(){
   const k=state.age;
   const head=[1,2,3].map(i=>`<th class="${state.plan===i?'sel-col':''}">${PLANS[i].name.replace('Fin for Kids ','')}</th>`).join('');
   const cell=(fn)=>[1,2,3].map(i=>`<td class="num ${state.plan===i?'sel-col':''}">${fn(PLANS[i],i)}</td>`).join('');
+  const bodyRows=COV_ROWS.map(r=>r.sec
+    ?`<tr class="sec"><td colspan="4">${r.sec}</td></tr>`
+    :`<tr><td${r.ind?' style="padding-left:20px"':''}>${r.ind?'• ':''}${r.l}</td>${cell(p=>r.v(p))}</tr>`).join('');
   document.getElementById('covTable').innerHTML=`
     <thead><tr><th style="text-align:left">ความคุ้มครอง (บาท)</th>${head}</tr></thead>
     <tbody>
-      <tr class="sec"><td colspan="4">ความคุ้มครองสำหรับผู้เอาประกันภัย (ผู้ปกครอง)</td></tr>
-      <tr><td>เสียชีวิต สูญเสียอวัยวะ สายตา หรือทุพพลภาพถาวรสิ้นเชิง (อบ.1)</td>${cell(()=>'500,000')}</tr>
-      <tr><td>ค่าปลงศพและค่าใช้จ่ายจัดการงานศพ (กรณีเจ็บป่วย รอคอย 180 วัน)</td>${cell(()=>'10,000')}</tr>
-      <tr class="sec"><td colspan="4">ความคุ้มครองสำหรับบุตร/หลาน</td></tr>
-      <tr><td>ค่ารักษาพยาบาลจากอุบัติเหตุ ต่อครั้ง</td>${cell(p=>fmt(p.accident))}</tr>
-      <tr><td>ค่ารักษาผู้ป่วยใน (IPD) จ่ายตามจริง ต่อการเข้าพักรักษาครั้งใดครั้งหนึ่ง</td>${cell(p=>fmt(p.ipd))}</tr>
-      <tr><td style="padding-left:20px">• ค่าห้องปกติ ค่าอาหาร ค่าบริการพยาบาล สูงสุด/วัน</td>${cell(()=>'3,000')}</tr>
-      <tr><td style="padding-left:20px">• ค่าห้อง ICU และค่าบริการพยาบาล สูงสุด/วัน</td>${cell(()=>'6,000')}</tr>
-      <tr><td>ค่ารักษาผู้ป่วยนอก (OPD) ต่อครั้ง (สูงสุด 30 วัน/ปี, 7 ครั้ง/โรค)</td>${cell(p=>fmt(p.opd))}</tr>
+      ${bodyRows}
       <tr class="sec"><td>เบี้ยประกันภัยรายปี (รวมอากรแสตมป์)</td>${cell(p=>fmt(p.premium[k]))}</tr>
       <tr class="pickrow"><td></td>${[1,2,3].map(i=>`<td class="num"><button class="btn ${state.plan===i?'btn-red':'btn-outline'} btn-sm" onclick="pickPlan2(${i})">${state.plan===i?'✓ แผนที่เลือก':'เลือกแผนนี้'}</button></td>`).join('')}</tr>
     </tbody>`;
+  state.mPlan=state.plan||state.mPlan||1;
+  renderCovMobile();
   const infant=k==='infant';
   document.getElementById('dzTitle').textContent='โรคที่ได้รับความคุ้มครอง · อายุ '+AGE_GROUPS.find(a=>a.key===k).label+(infant?' (5 โรค)':' (8 โรค)');
   document.getElementById('dzList').innerHTML=DISEASES.map(d=>{
@@ -655,6 +685,28 @@ function renderStep2(){
   }).join('');
 }
 function pickPlan2(i){ state.plan=i; state.payMode=null; state.slipFile=null; goStep(3); }
+
+/* มุมมองมือถือ: แท็บ 3 แผน + รายการความคุ้มครองของแผนที่เลือกดู */
+function renderCovMobile(){
+  const k=state.age, i=state.mPlan, p=PLANS[i];
+  const tabs=[1,2,3].map(j=>`
+    <button class="ptab ${j===i?'on':''}" onclick="setMPlan(${j})">
+      ${j===3?'<span class="mini-hot">คุ้มครองสูงสุด</span>':''}
+      ${PLANS[j].name.replace('Fin for Kids ','')}
+      <span class="pp">${fmt(PLANS[j].premium[k])} บ./ปี</span>
+    </button>`).join('');
+  const rows=COV_ROWS.map(r=>r.sec
+    ?`<div class="cov-sec">${r.sec}</div>`
+    :`<div class="cov-row${r.ind?' ind':''}"><span class="cl">${r.l}</span><span class="cv">${r.v(p)}</span></div>`).join('');
+  document.getElementById('covMobile').innerHTML=`
+    <div class="ptabs">${tabs}</div>
+    ${rows}
+    <div class="prem-mb">
+      <div><div class="pk">เบี้ยรายปี (รวมอากรแสตมป์)</div><div class="pv">${fmt(p.premium[k])} <small>บาท</small></div></div>
+      <button class="btn btn-red btn-sm" onclick="pickPlan2(${i})">${state.plan===i?'✓ ใช้แผนนี้':'เลือกแผนนี้'}</button>
+    </div>`;
+}
+function setMPlan(i){ state.mPlan=i; renderCovMobile(); }
 
 /* ================= STEP 3 : PAYMENT ================= */
 function calcSchedule(total,mode){
