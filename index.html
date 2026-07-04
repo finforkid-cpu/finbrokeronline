@@ -547,6 +547,7 @@ const LIFF_DEBUG = location.href.indexOf('liffdebug') > -1;
   catch (e) {
     liffErr = 'init ล้มเหลว: ' + (e.message || e);
     console.warn('LIFF init failed', e);
+    logClient(null, 'liff_init_failed', liffErr);
     if (LIFF_DEBUG) alert('⚠️ LIFF ' + liffErr);
   }
 })();
@@ -1072,23 +1073,35 @@ function buildFlex(refNo,planName,annual,payText,firstAmt){
   };
 }
 
+/* ส่ง log ขึ้นฐานข้อมูลเพื่อให้ทีมงานวินิจฉัยได้โดยไม่ต้องเห็นหน้าจอลูกค้า */
+function logClient(refNo,event,detail){
+  try{
+    sb.from('client_logs').insert({
+      ref_no:refNo||null, event, detail:String(detail||'').slice(0,500),
+      user_agent:navigator.userAgent
+    }).then(()=>{});
+  }catch(e){}
+}
+
 /* ส่ง Flex เข้าห้องแชท (ทำงานเฉพาะเปิดผ่าน LIFF ในแอป LINE — นอกนั้นข้ามเงียบ ๆ ไม่กระทบการสมัคร) */
 async function sendLineFlex(refNo,planName,annual,payText,firstAmt){
   let why='';
+  const ctx=()=> {try{return (liff.getContext()||{}).type||'ไม่ทราบ';}catch(e){return 'ไม่ทราบ';}};
   try{
     if(!liffOk){ why=liffErr||'LIFF ยังไม่พร้อม (เปิดนอกแอป LINE?)'; }
-    else if(!liff.isInClient()){ why='ไม่ได้เปิดในแอป LINE'; }
+    else if(!liff.isInClient()){ why='ไม่ได้เปิดในแอป LINE (isInClient=false)'; }
     else if(!liff.isApiAvailable('sendMessages')){
-      const ctx=(liff.getContext()||{}).type||'ไม่ทราบ';
-      why='sendMessages ใช้ไม่ได้ · บริบทที่เปิด: '+ctx+' (ต้องเปิดจากห้องแชท และ LIFF ต้องมี scope chat_message.write)';
+      why='sendMessages ใช้ไม่ได้ · บริบทที่เปิด: '+ctx()+' (ต้องเปิดจากห้องแชท และ LIFF ต้องมี scope chat_message.write)';
     }
     else{
       await liff.sendMessages([buildFlex(refNo,planName,annual,payText,firstAmt)]);
+      logClient(refNo,'flex_send','success · context='+ctx());
       if(LIFF_DEBUG) alert('✅ ส่ง Flex เข้าแชทสำเร็จ');
       return;
     }
-  }catch(e){ why='ส่งไม่สำเร็จ: '+(e.message||e); }
+  }catch(e){ why='ส่งไม่สำเร็จ: '+(e.message||e)+' · context='+ctx(); }
   console.warn('flex skipped:',why);
+  logClient(refNo,'flex_skip',why);
   if(LIFF_DEBUG) alert('⚠️ ไม่ได้ส่ง Flex — '+why);
 }
 
