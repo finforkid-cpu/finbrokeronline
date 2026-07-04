@@ -254,6 +254,11 @@ input,select,textarea{font-family:inherit;font-size:16px}
   .disease-list{grid-template-columns:1fr}
   .table-scroll{display:none}
   .cov-mobile{display:block}
+  /* กล่องสรุปแผน: หัวข้อบน-ค่าล่าง อ่านง่ายบนจอแคบ */
+  .sum-row{flex-direction:column;gap:1px}
+  .sum-row .k{font-size:12.5px}
+  .sum-row .v{text-align:left}
+  .sum-total{flex-direction:column;align-items:flex-start;gap:2px}
   .stepper{padding:0 8px}
   .step .lbl{font-size:10.5px}
   .step-line{left:34px;right:34px}
@@ -421,10 +426,10 @@ input,select,textarea{font-family:inherit;font-size:16px}
     <div class="form-sec-title" style="margin-top:22px"><span class="n">3</span>ที่อยู่สำหรับจัดส่งกรมธรรม์</div>
     <div class="fgrid">
       <div class="fld full"><label>ที่อยู่ <span class="req">*</span></label><textarea id="addr" rows="2" placeholder="บ้านเลขที่ หมู่บ้าน ซอย ถนน"></textarea><div class="err">กรุณากรอกที่อยู่</div></div>
-      <div class="fld"><label>จังหวัด <span class="req">*</span></label><select id="prov" onchange="onProvince()"><option value="">— เลือกจังหวัด —</option></select><div class="err">กรุณาเลือกจังหวัด</div></div>
-      <div class="fld"><label>อำเภอ/เขต <span class="req">*</span></label><select id="amph" onchange="onAmphure()" disabled><option value="">— เลือกอำเภอ/เขต —</option></select><div class="err">กรุณาเลือกอำเภอ/เขต</div></div>
-      <div class="fld"><label>ตำบล/แขวง <span class="req">*</span></label><select id="tmb" onchange="onTambon()" disabled><option value="">— เลือกตำบล/แขวง —</option></select><div class="err">กรุณาเลือกตำบล/แขวง</div></div>
-      <div class="fld"><label>รหัสไปรษณีย์ <span class="req">*</span></label><input id="zip" readonly placeholder="เติมอัตโนมัติ" style="background:var(--navy-soft)"><div class="err">กรุณาเลือกตำบล/แขวงก่อน</div></div>
+      <div class="fld"><label>จังหวัด <span class="req">*</span></label><input id="prov" placeholder="เช่น กรุงเทพมหานคร"><div class="err">กรุณากรอกจังหวัด</div></div>
+      <div class="fld"><label>อำเภอ/เขต <span class="req">*</span></label><input id="amph" placeholder="เช่น บางรัก"><div class="err">กรุณากรอกอำเภอ/เขต</div></div>
+      <div class="fld"><label>ตำบล/แขวง <span class="req">*</span></label><input id="tmb" placeholder="เช่น สีลม"><div class="err">กรุณากรอกตำบล/แขวง</div></div>
+      <div class="fld"><label>รหัสไปรษณีย์ <span class="req">*</span></label><input id="zip" inputmode="numeric" maxlength="5" placeholder="10500"><div class="err">กรุณากรอกรหัสไปรษณีย์ 5 หลัก</div></div>
     </div>
 
     <div class="note-navy" style="margin-top:16px">
@@ -518,51 +523,38 @@ async function loadPremiums(){
   }catch(e){ console.warn('โหลดเบี้ยจากฐานข้อมูลไม่สำเร็จ ใช้ค่าในหน้าเว็บแทน', e); }
 }
 
-/* ===== ที่อยู่: จังหวัด → อำเภอ/เขต → ตำบล/แขวง → รหัสไปรษณีย์อัตโนมัติ ===== */
-async function initAddress(){
+/* ===== ที่อยู่: กรอกอิสระทุกช่อง ===== */
+function fldVal(id){ return document.getElementById(id).value.trim(); }
+
+/* ===== บันทึกร่างอัตโนมัติ: ปิดหน้าแล้วกลับมา ข้อมูลยังอยู่ ===== */
+const DRAFT_KEY='ffk_draft_v1';
+const DRAFT_FIELDS=['pName','pDob','pCid','pTel','pEmail','pJob','pHeight','pWeight','cName','cDob','cCid','addr','prov','amph','tmb','zip'];
+let draftDone=false, draftReady=false; // ห้ามบันทึกจนกว่าจะกู้ร่างเก่าเสร็จ (กัน goStep(1) ตอน init เขียนทับ)
+function saveDraft(){
+  if(draftDone||!draftReady) return;
   try{
-    const {data,error}=await sb.from('thai_provinces').select('id,name_th').order('name_th');
-    if(error||!data||!data.length) return;
-    document.getElementById('prov').innerHTML='<option value="">— เลือกจังหวัด —</option>'+
-      data.map(p=>`<option value="${p.id}">${p.name_th}</option>`).join('');
-  }catch(e){ console.warn('โหลดรายชื่อจังหวัดไม่สำเร็จ',e); }
+    const f={};
+    DRAFT_FIELDS.forEach(id=>{ const el=document.getElementById(id); if(el&&el.value) f[id]=el.value; });
+    localStorage.setItem(DRAFT_KEY,JSON.stringify({f,age:state.age,plan:state.plan,payMode:state.payMode,step:curStep,ts:Date.now()}));
+  }catch(e){}
 }
-function resetSelect(id,label){
-  const el=document.getElementById(id);
-  el.innerHTML=`<option value="">— ${label} —</option>`;
-  el.disabled=true;
+function clearDraft(){ draftDone=true; try{ localStorage.removeItem(DRAFT_KEY); }catch(e){} }
+function restoreDraft(){
+  try{
+    const d=JSON.parse(localStorage.getItem(DRAFT_KEY)||'null');
+    draftReady=true;
+    if(!d) return;
+    if(d.age) pickAge(d.age);                 // ต้องมาก่อน เพราะ pickAge ล้าง state.plan
+    if(d.plan) state.plan=d.plan;
+    if(d.payMode) state.payMode=d.payMode;
+    Object.entries(d.f||{}).forEach(([id,v])=>{ const el=document.getElementById(id); if(el) el.value=v; });
+    let s=d.step||1;
+    if(s>1&&!(d.age&&d.plan)) s=1;
+    if(s>4) s=4;                               // ไม่กู้กลับไปหน้าขอบคุณ
+    if(s>1) goStep(s);
+    window.scrollTo({top:0});
+  }catch(e){}finally{ draftReady=true; }
 }
-async function onProvince(){
-  resetSelect('amph','เลือกอำเภอ/เขต');
-  resetSelect('tmb','เลือกตำบล/แขวง');
-  document.getElementById('zip').value='';
-  const pid=+document.getElementById('prov').value;
-  if(!pid) return;
-  const {data,error}=await sb.from('thai_districts').select('id,name_th').eq('province_id',pid).order('name_th');
-  if(error||!data) return;
-  const el=document.getElementById('amph');
-  el.innerHTML='<option value="">— เลือกอำเภอ/เขต —</option>'+data.map(d=>`<option value="${d.id}">${d.name_th}</option>`).join('');
-  el.disabled=false;
-}
-async function onAmphure(){
-  resetSelect('tmb','เลือกตำบล/แขวง');
-  document.getElementById('zip').value='';
-  const did=+document.getElementById('amph').value;
-  if(!did) return;
-  const {data,error}=await sb.from('thai_sub_districts').select('id,name_th,zip_code').eq('district_id',did).order('name_th');
-  if(error||!data) return;
-  const el=document.getElementById('tmb');
-  el.innerHTML='<option value="">— เลือกตำบล/แขวง —</option>'+data.map(t=>`<option value="${t.id}" data-zip="${t.zip_code}">${t.name_th}</option>`).join('');
-  el.disabled=false;
-}
-function onTambon(){
-  const el=document.getElementById('tmb');
-  const zip=el.selectedOptions[0]?.dataset.zip||'';
-  const zipEl=document.getElementById('zip');
-  zipEl.value=zip;
-  if(zip) zipEl.closest('.fld').classList.remove('invalid');
-}
-function selText(id){ const el=document.getElementById(id); return el.value?(el.selectedOptions[0]?.text||''):''; }
 
 /* ================= STEPPER ================= */
 let curStep=1;
@@ -578,7 +570,7 @@ function goStep(n){
   });
   if(n===2) renderStep2();
   if(n===3) renderStep3();
-  if(n===5) burstConfetti();
+  if(n===5){ clearDraft(); burstConfetti(); } else saveDraft();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
@@ -627,6 +619,7 @@ function pickAge(k){
       </div></div>`;
   }).join('');
   renderPlanDots();
+  saveDraft();
   card.scrollIntoView({behavior:'smooth',block:'start'});
 }
 function pickPlan(i){ state.plan=i; state.payMode=null; state.slipFile=null; goStep(2); }
@@ -770,6 +763,7 @@ function pickPay(m,keep){
   document.getElementById('bankCard').style.display='block';
   document.getElementById('payNow').textContent=fmt(state.firstPay)+' บาท';
   updateNextBtn();
+  saveDraft();
 }
 function copyAcc(no,btn){ navigator.clipboard?.writeText(no); btn.textContent='คัดลอกแล้ว ✓'; setTimeout(()=>btn.textContent='คัดลอก',1500); }
 function onSlip(inp){
@@ -915,9 +909,9 @@ async function submitApp(){
   ok&=mark('cCid',validCid(document.getElementById('cCid').value.trim()));
   ok&=(state.docs.birthCert?true:(document.getElementById('upBirth').closest('.fld').classList.add('invalid'),false));
   ok&=mark('addr',document.getElementById('addr').value.trim().length>8);
-  ok&=mark('prov',!!document.getElementById('prov').value);
-  ok&=mark('amph',!!document.getElementById('amph').value);
-  ok&=mark('tmb',!!document.getElementById('tmb').value);
+  ok&=mark('prov',fldVal('prov').length>=2);
+  ok&=mark('amph',fldVal('amph').length>=2);
+  ok&=mark('tmb',fldVal('tmb').length>=2);
   ok&=mark('zip',/^\d{5}$/.test(document.getElementById('zip').value.trim()));
   if(!document.getElementById('consent').checked){ alert('กรุณาติ๊กยอมรับคำรับรองและความยินยอม PDPA ก่อนยืนยันทำประกัน'); return; }
   if(!ok){
@@ -962,9 +956,9 @@ async function submitApp(){
       },
       address:{
         address_text:document.getElementById('addr').value.trim(),
-        sub_district:selText('tmb'),
-        district:selText('amph'),
-        province:selText('prov'),
+        sub_district:fldVal('tmb'),
+        district:fldVal('amph'),
+        province:fldVal('prov'),
         postal_code:document.getElementById('zip').value.trim(),
       },
       documents:{
@@ -1009,7 +1003,8 @@ setInterval(tickClock,1000);
 renderAges();
 goStep(1);
 loadPremiums();
-initAddress();
+DRAFT_FIELDS.forEach(id=>document.getElementById(id)?.addEventListener('input',saveDraft));
+restoreDraft();
 </script>
 </body>
 </html>
