@@ -307,7 +307,9 @@ tbody tr:hover{background:var(--navy-soft)}
   </div>
 
   <div class="card">
-    <div class="sec-head"><h3>ใบสมัครทั้งหมด</h3><span class="cnt" id="tblCount"></span></div>
+    <div class="sec-head"><h3>ใบสมัครทั้งหมด</h3><span class="cnt" id="tblCount"></span>
+      <button class="btn btn-red" style="margin-left:auto;padding:8px 16px;font-size:13.5px" onclick="openAddForm()">➕ เพิ่มรายการ</button>
+    </div>
     <div class="filters">
       <input id="q" placeholder="ค้นหา: เลขอ้างอิง / ชื่อ / เบอร์โทร" oninput="renderTable()">
       <select id="stFilter" onchange="renderTable()">
@@ -785,6 +787,128 @@ async function saveEdit(id){
   toast('✅ บันทึกการแก้ไขเรียบร้อย');
   await loadData();
   openModal(id);
+}
+
+/* ===== เพิ่มรายการโดยแอดมิน ===== */
+function validCid(id){
+  if(!/^\d{13}$/.test(id)) return false;
+  let s=0; for(let i=0;i<12;i++) s+=+id[i]*(13-i);
+  return (11-s%11)%10===+id[12];
+}
+const ADD_ERR_TH={
+  DUPLICATE_CHILD:'บุตรคนนี้มีคำขอ FIN FOR KIDS PLUS อยู่แล้ว (1 ฉบับ/เด็ก 1 คน)',
+  INVALID_PARENT_CID:'เลขบัตรประชาชนผู้ปกครองไม่ถูกต้อง',
+  INVALID_CHILD_CID:'เลขบัตรประชาชนบุตรไม่ถูกต้อง',
+  INVALID_PHONE:'เบอร์โทรศัพท์ไม่ถูกต้อง',
+  INVALID_EMAIL:'รูปแบบอีเมลไม่ถูกต้อง',
+  INVALID_PARENT_NAME:'กรุณากรอกชื่อ-นามสกุลผู้ปกครอง',
+  INVALID_OCCUPATION:'กรุณากรอกอาชีพ',
+  INVALID_ADDRESS:'กรุณากรอกที่อยู่ ตำบล อำเภอ จังหวัด ให้ครบ',
+  INVALID_POSTAL_CODE:'รหัสไปรษณีย์ไม่ถูกต้อง',
+  PLAN_NOT_FOUND:'ไม่พบแผน/ช่วงอายุที่เลือก',
+};
+function openAddForm(){
+  const F=(id,label,ph='',attrs='')=>`<div class="fld"><label>${label}</label><input id="${id}" placeholder="${ph}" ${attrs}></div>`;
+  document.getElementById('modalBody').innerHTML=`
+    <h3 class="kanit" style="color:var(--navy);font-size:17px;padding-right:26px;margin-bottom:12px">➕ เพิ่มรายการใบสมัคร (โดยแอดมิน)</h3>
+    <div class="sec-head"><h3 style="font-size:15px">แผนประกัน</h3></div>
+    <div class="efgrid">
+      <div class="fld"><label>ช่วงอายุบุตร</label><select id="nAge" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px">
+        <option value="INFANT">👶 15 วัน – &lt;1 ปี</option><option value="TODDLER" selected>🧒 1 – 5 ปี</option><option value="KID">🎒 6 – 20 ปี</option></select></div>
+      <div class="fld"><label>แผน</label><select id="nPlan" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px">
+        <option value="1">Plus 1</option><option value="2">Plus 2</option><option value="3">Plus 3</option></select></div>
+      <div class="fld full"><label>วิธีชำระเงิน</label><select id="nPay" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px">
+        <option value="FULL">เต็มจำนวน</option><option value="INST_3">ผ่อน 3 งวด</option><option value="INST_4">ผ่อน 4 งวด</option><option value="INST_6">ผ่อน 6 งวด</option></select></div>
+    </div>
+    <div class="sec-head"><h3 style="font-size:15px">ผู้ปกครอง</h3></div>
+    <div class="efgrid">
+      ${F('nName','ชื่อ-นามสกุล *','เช่น สมชาย ใจดี')}
+      ${F('nPhone','เบอร์โทรศัพท์ *','08XXXXXXXX','inputmode="tel" maxlength="10"')}
+      ${F('nEmail','อีเมล *','name@email.com','type="email"')}
+      ${F('nJob','อาชีพ *','เช่น พนักงานบริษัท')}
+      <div class="fld full">${''}<label>เลขบัตรประชาชน 13 หลัก</label><input id="nCid" inputmode="numeric" maxlength="13" placeholder="ไม่บังคับ — ถ้ากรอกต้องถูกต้อง"></div>
+    </div>
+    <div class="sec-head"><h3 style="font-size:15px">ที่อยู่จัดส่งกรมธรรม์</h3></div>
+    <div class="efgrid">
+      <div class="fld full"><label>ที่อยู่ *</label><input id="nAddr" placeholder="บ้านเลขที่ หมู่บ้าน ซอย ถนน"></div>
+      ${F('nTmb','ตำบล/แขวง *','เช่น สีลม')}
+      ${F('nAmph','อำเภอ/เขต *','เช่น บางรัก')}
+      ${F('nProv','จังหวัด *','เช่น กรุงเทพมหานคร')}
+      ${F('nZip','รหัสไปรษณีย์ *','10500','inputmode="numeric" maxlength="5"')}
+    </div>
+    <div class="sec-head"><h3 style="font-size:15px">บุตร/หลาน</h3></div>
+    <div class="efgrid">
+      ${F('cName2','ชื่อ-นามสกุลบุตร','เช่น ด.ช. ฟินดี ใจดี')}
+      ${F('cDob2','วัน/เดือน/ปีเกิดบุตร','','type="date"')}
+      <div class="fld full"><label>เลขบัตรประชาชนบุตร</label><input id="cCid2" inputmode="numeric" maxlength="13" placeholder="ไม่บังคับ — ใช้กันทำซ้ำ 1 ฉบับ/เด็ก"></div>
+    </div>
+    <div class="sec-head"><h3 style="font-size:15px">เอกสารแนบ (ไม่บังคับ)</h3></div>
+    <div class="efgrid">
+      <div class="fld"><label>บัตรประชาชนผู้ปกครอง</label><input id="nDocPid" type="file" accept="image/*,.pdf"></div>
+      <div class="fld"><label>สูติบัตรบุตร</label><input id="nDocBirth" type="file" accept="image/*,.pdf"></div>
+      <div class="fld full"><label>สลิปโอนเงิน</label><input id="nDocSlip" type="file" accept="image/*,.pdf"></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      <button class="btn btn-red" id="addSaveBtn" onclick="submitAdd()">💾 บันทึกรายการ</button>
+      <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
+    </div>`;
+  document.getElementById('overlay').classList.add('show');
+}
+async function submitAdd(){
+  const v=id=>document.getElementById(id).value.trim();
+  if(v('nName').length<3){ toast('⚠️ กรุณากรอกชื่อ-นามสกุลผู้ปกครอง'); return; }
+  if(!/^0\d{9}$/.test(v('nPhone'))){ toast('⚠️ เบอร์โทรต้องเป็นตัวเลข 10 หลักขึ้นต้นด้วย 0'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v('nEmail'))){ toast('⚠️ รูปแบบอีเมลไม่ถูกต้อง'); return; }
+  if(v('nJob').length<2){ toast('⚠️ กรุณากรอกอาชีพ'); return; }
+  if(v('nCid')&&!validCid(v('nCid'))){ toast('⚠️ เลขบัตรประชาชนผู้ปกครองไม่ถูกต้อง'); return; }
+  if(!v('nAddr')){ toast('⚠️ กรุณากรอกที่อยู่'); return; }
+  if(v('nTmb').length<2||v('nAmph').length<2||v('nProv').length<2){ toast('⚠️ กรุณากรอกตำบล/อำเภอ/จังหวัดให้ครบ'); return; }
+  if(!/^\d{5}$/.test(v('nZip'))){ toast('⚠️ รหัสไปรษณีย์ต้องเป็นตัวเลข 5 หลัก'); return; }
+  if(v('cCid2')&&!validCid(v('cCid2'))){ toast('⚠️ เลขบัตรประชาชนบุตรไม่ถูกต้อง'); return; }
+  const btn=document.getElementById('addSaveBtn');
+  btn.disabled=true; btn.textContent='⏳ กำลังบันทึก...';
+  try{
+    const sid=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2));
+    const up=async(inputId,key)=>{
+      const f=document.getElementById(inputId).files[0];
+      if(!f) return null;
+      if(f.size>10*1024*1024) throw new Error('ไฟล์'+key+'ต้องไม่เกิน 10 MB');
+      const ext=(f.name.split('.').pop()||'bin').toLowerCase().replace(/[^a-z0-9]/g,'')||'bin';
+      const path=sid+'/'+key+'-'+Date.now()+'.'+ext;
+      const {error}=await sb.storage.from('applications').upload(path,f,{contentType:f.type||'application/octet-stream'});
+      if(error) throw new Error('อัปโหลดไฟล์ไม่สำเร็จ: '+error.message);
+      return {path,name:f.name,size:f.size,mime:f.type||''};
+    };
+    btn.textContent='⏳ กำลังอัปโหลดเอกสาร...';
+    const [pid,bc,slip]=await Promise.all([
+      up('nDocPid','parent-id-card'), up('nDocBirth','child-birth-cert'), up('nDocSlip','payment-slip'),
+    ]);
+    btn.textContent='⏳ กำลังบันทึกใบสมัคร...';
+    const docs={};
+    if(slip) docs.payment_slip=slip;
+    if(pid) docs.parent_id_card=pid;
+    if(bc) docs.child_birth_cert=bc;
+    const payload={
+      plan_id:+v('nPlan'), age_group:v('nAge'), pay_mode:v('nPay'),
+      pdpa_consent:true, utm_source:'admin',
+      parent:{full_name:v('nName'),phone:v('nPhone'),email:v('nEmail'),occupation:v('nJob'),
+              citizen_id:v('nCid')||null,height_cm:0,weight_kg:0},
+      child:{full_name:v('cName2')||null,citizen_id:v('cCid2')||null,birth_date:v('cDob2')||null},
+      address:{address_text:v('nAddr'),sub_district:v('nTmb'),district:v('nAmph'),
+               province:v('nProv'),postal_code:v('nZip')},
+      documents:docs,
+    };
+    const {data,error}=await sb.rpc('submit_application',{payload});
+    if(error){
+      const key=Object.keys(ADD_ERR_TH).find(k=>(error.message||'').includes(k));
+      throw new Error(ADD_ERR_TH[key]||error.message);
+    }
+    toast('✅ เพิ่มรายการสำเร็จ · เลขอ้างอิง '+data.ref_no);
+    closeModal(); loadData();
+  }catch(e){
+    toast('❌ '+(e.message||'บันทึกไม่สำเร็จ'));
+    btn.disabled=false; btn.textContent='💾 บันทึกรายการ';
+  }
 }
 
 /* ===== ลบรายการ (ลบไฟล์แนบ + ข้อมูลทุกตารางที่เกี่ยวข้อง) ===== */
