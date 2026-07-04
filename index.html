@@ -539,11 +539,15 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 /* ================= LINE LIFF ================= */
 /* ใส่ LIFF ID จาก LINE Developers Console เช่น '1234567890-AbcdEfgh' */
 const LIFF_ID = '2005495388-S62xumht';
-let liffOk = false, liffErr = '';
+let liffOk = false, liffErr = '', lineUserId = '';
 const LIFF_DEBUG = location.href.indexOf('liffdebug') > -1;
 (async () => {
   if (!window.liff) { liffErr = 'LIFF SDK โหลดไม่ขึ้น'; return; }
-  try { await liff.init({ liffId: LIFF_ID }); liffOk = true; }
+  try {
+    await liff.init({ liffId: LIFF_ID }); liffOk = true;
+    // เก็บ userId ไว้ให้หลังบ้าน push แจ้งผลอนุมัติทาง LINE ได้
+    if (liff.isLoggedIn()) { const pf = await liff.getProfile(); lineUserId = pf.userId || ''; }
+  }
   catch (e) {
     liffErr = 'init ล้มเหลว: ' + (e.message || e);
     console.warn('LIFF init failed', e);
@@ -1148,6 +1152,7 @@ async function submitApp(){
       pay_mode:state.payMode==='full'?'FULL':'INST_'+state.payMode,
       pdpa_consent:true,
       utm_source:new URLSearchParams(location.search).get('utm_source')||'web',
+      line_user_id:lineUserId||null,
       parent:{
         full_name:document.getElementById('pName').value.trim(),
         phone:document.getElementById('pTel').value.trim(),

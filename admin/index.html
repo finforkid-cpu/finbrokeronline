@@ -12,10 +12,13 @@
 :root{
   --fin-red:#E2222D; --fin-red-dark:#B5121C; --fin-red-soft:#FBE9EB;
   --navy:#1B1464; --navy-soft:#EDECF6;
-  --ink:#2A2D3A; --grey:#5A5F6E; --line:#E4E6ED; --bg:#F6F7FA; --card:#FFFFFF;
+  --ink:#2A2D3A; --grey:#5A5F6E; --line:#E4E6ED; --bg:#F4F5F9; --card:#FFFFFF;
   --ok:#1E9E5A; --ok-soft:#E8F7EF; --warn:#B45309; --warn-soft:#FEF3C7;
   --bad:#B5121C; --bad-soft:#FBE9EB;
-  --radius:14px; --shadow:0 6px 24px rgba(27,20,100,.08);
+  /* ชุดสีกราฟ (ผ่าน validator: lightness/chroma/CVD/contrast) */
+  --c-indigo:#4C43CE; --c-amber:#B78103; --c-blue:#4A90D9; --c-red:#E2222D;
+  --c-green:#1E9E5A; --c-grey:#8A8FA0;
+  --radius:16px; --shadow:0 4px 20px rgba(27,20,100,.07);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Anuphan',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
@@ -23,7 +26,7 @@ h1,h2,h3,.kanit{font-family:'Kanit',sans-serif}
 button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit;font-size:15px}
 
-.topbar{background:var(--card);border-bottom:4px solid var(--fin-red);padding:12px 20px;display:flex;align-items:center;gap:14px}
+.topbar{background:var(--card);border-bottom:4px solid var(--fin-red);padding:12px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
 .fin-logo{font-family:'Kanit';font-weight:700;font-size:22px;color:var(--fin-red);line-height:1}
 .fin-logo small{display:block;font-size:9px;color:var(--navy);font-weight:600;letter-spacing:1.2px}
 .topbar .ttl{font-family:'Kanit';font-weight:600;color:var(--navy);font-size:15px}
@@ -35,48 +38,71 @@ input,select{font-family:inherit;font-size:15px}
 .btn-ghost{background:var(--navy-soft);color:var(--navy)}
 .btn:disabled{background:#C9CBD6;color:#fff;cursor:not-allowed}
 
-.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px;margin-bottom:14px}
-.h-title{font-size:17px;color:var(--navy);font-weight:600;margin-bottom:10px;font-family:'Kanit'}
+.wrap{max-width:1120px;margin:0 auto;padding:20px 18px 70px}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-head::before{content:'';width:4px;height:20px;background:var(--fin-red);border-radius:2px}
+.sec-head h3{font-size:16.5px;color:var(--navy);font-weight:600}
+.sec-head .cnt{font-size:12.5px;color:var(--grey);font-weight:500}
 
 /* ===== Login ===== */
 .login-box{max-width:400px;margin:8vh auto}
-.login-box .fld{margin-bottom:12px}
+.fld{margin-bottom:12px}
 .fld label{display:block;font-size:13px;font-weight:600;margin-bottom:4px}
-.fld input,.fld select{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;background:#fff}
+.fld input{width:100%;border:1.5px solid var(--line);border-radius:10px;padding:11px 12px;background:#fff}
 .fld input:focus{outline:none;border-color:var(--fin-red);box-shadow:0 0 0 3px var(--fin-red-soft)}
 .login-err{display:none;background:var(--bad-soft);color:var(--bad);border-radius:8px;padding:8px 12px;font-size:13px;margin-bottom:10px}
 
 /* ===== Stat tiles ===== */
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin-bottom:14px}
-.tile{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 16px}
-.tile .k{font-size:12.5px;color:var(--grey);font-weight:600}
-.tile .v{font-family:'Kanit';font-weight:700;font-size:28px;color:var(--navy);line-height:1.25}
-.tile .v small{font-size:13px;color:var(--grey);font-weight:500;font-family:'Anuphan'}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px}
+.tile{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;display:flex;gap:14px;align-items:center}
+.tile .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.tile .ic.i-navy{background:var(--navy-soft)}
+.tile .ic.i-warn{background:var(--warn-soft)}
+.tile .ic.i-red{background:var(--fin-red-soft)}
+.tile .ic.i-ok{background:var(--ok-soft)}
+.tile .k{font-size:12px;color:var(--grey);font-weight:600}
+.tile .v{font-family:'Kanit';font-weight:700;font-size:26px;color:var(--navy);line-height:1.2}
+.tile .v small{font-size:12.5px;color:var(--grey);font-weight:500;font-family:'Anuphan'}
 .tile.hot .v{color:var(--fin-red)}
 
-/* ===== Bar chart (แผน) ===== */
-.hb-row{display:grid;grid-template-columns:64px 1fr 44px;align-items:center;gap:10px;margin-bottom:10px}
-.hb-lbl{font-size:13px;color:var(--ink);font-weight:600;text-align:right}
-.hb-track{background:var(--bg);border-radius:6px;height:16px;position:relative}
-.hb-fill{background:var(--navy);height:16px;border-radius:0 4px 4px 0;min-width:2px;transition:width .5s ease}
+/* ===== Charts ===== */
+.charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:760px){.charts{grid-template-columns:1fr}}
+.charts .card{margin-bottom:0}
+.hb-row{display:grid;grid-template-columns:56px 1fr 40px;align-items:center;gap:10px;margin-bottom:12px}
+.hb-lbl{font-size:13px;font-weight:600;text-align:right;color:var(--ink)}
+.hb-track{background:var(--bg);border-radius:6px;height:18px}
+.hb-fill{background:var(--navy);height:18px;border-radius:0 4px 4px 0;min-width:2px;transition:width .6s cubic-bezier(.22,.8,.36,1)}
 .hb-val{font-family:'Kanit';font-weight:600;font-size:13.5px;color:var(--grey)}
+.prop-title{font-size:13px;font-weight:600;color:var(--grey);margin:2px 0 8px}
+.prop-bar{display:flex;height:22px;border-radius:8px;overflow:hidden;background:var(--bg)}
+.prop-bar .seg{height:100%;border-right:2px solid var(--card);transition:width .6s cubic-bezier(.22,.8,.36,1)}
+.prop-bar .seg:last-child{border-right:none}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px}
+.legend .li{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink)}
+.legend .dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.legend b{font-family:'Kanit';color:var(--navy)}
+.prop-gap{height:18px}
 
 /* ===== Filters & table ===== */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
-.filters input,.filters select{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px;background:#fff}
+.filters input,.filters select{border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
 .filters input{flex:1;min-width:180px}
-.tbl-scroll{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
-th{background:var(--navy);color:#fff;font-family:'Kanit';font-weight:600;padding:9px 10px;font-size:12.5px;text-align:left;white-space:nowrap}
-td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:middle}
+.tbl-scroll{overflow-x:auto;border-radius:10px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:780px}
+th{background:var(--navy);color:#fff;font-family:'Kanit';font-weight:600;padding:10px 12px;font-size:12.5px;text-align:left;white-space:nowrap}
+td{border-bottom:1px solid var(--line);padding:10px 12px;vertical-align:middle}
+tbody tr:nth-child(even){background:#FAFBFD}
 tbody tr{cursor:pointer;transition:.12s}
 tbody tr:hover{background:var(--navy-soft)}
 .mono{font-family:'Kanit';font-weight:600;color:var(--navy);white-space:nowrap}
 .money{font-family:'Kanit';font-weight:600;color:var(--fin-red);white-space:nowrap}
+.who .nm{font-weight:600}
+.who .ph{font-size:12px;color:var(--grey)}
 
-/* ===== Status badges (มีไอคอน+ข้อความเสมอ ไม่พึ่งสีอย่างเดียว) ===== */
-.badge{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}
+/* ===== Status badges ===== */
+.badge{display:inline-flex;align-items:center;gap:5px;border-radius:99px;padding:3px 11px;font-size:12px;font-weight:600;white-space:nowrap}
 .b-warn{background:var(--warn-soft);color:var(--warn)}
 .b-navy{background:var(--navy-soft);color:var(--navy)}
 .b-ok{background:var(--ok-soft);color:var(--ok)}
@@ -86,28 +112,32 @@ tbody tr:hover{background:var(--navy-soft)}
 /* ===== Detail modal ===== */
 .overlay{position:fixed;inset:0;background:rgba(27,20,100,.45);display:none;z-index:20;overflow-y:auto;padding:24px 12px}
 .overlay.show{display:block}
-.modal{background:#fff;border-radius:16px;max-width:640px;margin:0 auto;padding:20px;position:relative}
+.modal{background:#fff;border-radius:18px;max-width:660px;margin:0 auto;padding:22px;position:relative}
 .modal .close{position:absolute;top:10px;right:12px;background:none;border:none;font-size:22px;color:var(--grey)}
-.kv{display:grid;grid-template-columns:150px 1fr;gap:4px 12px;font-size:14px;margin-bottom:12px}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:5px 12px;font-size:14px;margin-bottom:14px}
 .kv .k{color:var(--grey)}
 .kv .v{font-weight:600;color:var(--ink)}
-.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 14px}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin:8px 0 16px}
 .doc-grid a{display:block;border:1.5px solid var(--line);border-radius:10px;overflow:hidden;text-align:center;font-size:12px;color:var(--navy);text-decoration:none;background:var(--bg)}
 .doc-grid img{width:100%;height:110px;object-fit:cover;display:block}
 .doc-grid .cap{padding:5px;font-weight:600}
-.inst-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:14px}
+.inst-tbl{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:16px;min-width:0}
 .inst-tbl th{background:var(--navy-soft);color:var(--navy);padding:6px 8px}
 .inst-tbl td{padding:6px 8px;border-bottom:1px solid var(--line)}
-.status-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.status-row select{border:1.5px solid var(--line);border-radius:10px;padding:8px 12px}
+.status-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--bg);border-radius:12px;padding:12px}
+.status-row select{border:1.5px solid var(--line);border-radius:10px;padding:9px 12px;background:#fff}
+.approve-note{font-size:12px;color:var(--grey);margin-top:8px}
 
-.empty{color:var(--grey);text-align:center;padding:24px;font-size:14px}
+.toast{position:fixed;left:50%;top:14px;transform:translateX(-50%);background:var(--navy);color:#fff;font-family:'Kanit';font-weight:500;font-size:13.5px;padding:10px 18px;border-radius:99px;z-index:40;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.empty{color:var(--grey);text-align:center;padding:22px;font-size:14px}
 .loading{color:var(--grey);text-align:center;padding:30px}
 #dashboard{display:none}
 @media(max-width:560px){
   .kv{grid-template-columns:1fr}
   .kv .k{margin-top:6px}
-  .tile .v{font-size:23px}
+  .tile .v{font-size:22px}
+  .wrap{padding:14px 12px 60px}
 }
 </style>
 </head>
@@ -124,7 +154,7 @@ tbody tr:hover{background:var(--navy-soft)}
 <!-- ===== LOGIN ===== -->
 <div class="wrap" id="loginView">
   <div class="card login-box">
-    <h2 class="h-title">เข้าสู่ระบบหลังบ้าน</h2>
+    <div class="sec-head"><h3>เข้าสู่ระบบหลังบ้าน</h3></div>
     <div class="login-err" id="loginErr"></div>
     <div class="fld"><label>อีเมล</label><input id="email" type="email" autocomplete="username" placeholder="admin@email.com"></div>
     <div class="fld"><label>รหัสผ่าน</label><input id="password" type="password" autocomplete="current-password"></div>
@@ -136,19 +166,31 @@ tbody tr:hover{background:var(--navy-soft)}
 <div class="wrap" id="dashboard">
 
   <div class="tiles">
-    <div class="tile"><div class="k">ใบสมัครวันนี้</div><div class="v" id="stToday">–</div></div>
-    <div class="tile hot"><div class="k">รอเจ้าหน้าที่ตรวจ</div><div class="v" id="stPending">–</div></div>
-    <div class="tile"><div class="k">ใบสมัครทั้งหมด</div><div class="v" id="stTotal">–</div></div>
-    <div class="tile"><div class="k">เบี้ยรวม (ไม่นับยกเลิก/ปฏิเสธ)</div><div class="v" id="stPremium">–</div></div>
+    <div class="tile"><div class="ic i-navy">📥</div><div><div class="k">ใบสมัครวันนี้</div><div class="v" id="stToday">–</div></div></div>
+    <div class="tile hot"><div class="ic i-warn">⏳</div><div><div class="k">รอเจ้าหน้าที่ตรวจ</div><div class="v" id="stPending">–</div></div></div>
+    <div class="tile"><div class="ic i-ok">✅</div><div><div class="k">อนุมัติแล้ว</div><div class="v" id="stApproved">–</div></div></div>
+    <div class="tile"><div class="ic i-red">💰</div><div><div class="k">เบี้ยรวม (ไม่นับยกเลิก/ปฏิเสธ)</div><div class="v" id="stPremium">–</div></div></div>
+  </div>
+
+  <div class="charts">
+    <div class="card">
+      <div class="sec-head"><h3>ใบสมัครแยกตามแผน</h3><span class="cnt" id="planTotal"></span></div>
+      <div id="planChart"></div>
+    </div>
+    <div class="card">
+      <div class="sec-head"><h3>สัดส่วน</h3></div>
+      <div class="prop-title">สถานะใบสมัคร</div>
+      <div class="prop-bar" id="statusBar"></div>
+      <div class="legend" id="statusLegend"></div>
+      <div class="prop-gap"></div>
+      <div class="prop-title">วิธีชำระเงิน</div>
+      <div class="prop-bar" id="payBar"></div>
+      <div class="legend" id="payLegend"></div>
+    </div>
   </div>
 
   <div class="card">
-    <h3 class="h-title">ใบสมัครแยกตามแผน</h3>
-    <div id="planChart"></div>
-  </div>
-
-  <div class="card">
-    <h3 class="h-title">งวดผ่อนครบกำหนดใน 7 วัน</h3>
+    <div class="sec-head"><h3>งวดผ่อนครบกำหนดใน 7 วัน</h3></div>
     <div class="tbl-scroll"><table id="dueTbl" style="min-width:560px">
       <thead><tr><th>เลขอ้างอิง</th><th>งวดที่</th><th>ครบกำหนด</th><th>ยอด (บาท)</th><th>ผู้ปกครอง / เบอร์โทร</th></tr></thead>
       <tbody></tbody>
@@ -157,7 +199,7 @@ tbody tr:hover{background:var(--navy-soft)}
   </div>
 
   <div class="card">
-    <h3 class="h-title">ใบสมัครทั้งหมด</h3>
+    <div class="sec-head"><h3>ใบสมัครทั้งหมด</h3><span class="cnt" id="tblCount"></span></div>
     <div class="filters">
       <input id="q" placeholder="ค้นหา: เลขอ้างอิง / ชื่อ / เบอร์โทร" oninput="renderTable()">
       <select id="stFilter" onchange="renderTable()">
@@ -170,7 +212,7 @@ tbody tr:hover{background:var(--navy-soft)}
       </select>
     </div>
     <div class="tbl-scroll"><table id="appTbl">
-      <thead><tr><th>เลขอ้างอิง</th><th>วันที่สมัคร</th><th>แผน</th><th>ผู้ปกครอง</th><th>เบอร์โทร</th><th>ชำระ</th><th>เบี้ย/ปี</th><th>สถานะ</th></tr></thead>
+      <thead><tr><th>เลขอ้างอิง</th><th>วันที่สมัคร</th><th>แผน</th><th>ผู้ปกครอง</th><th>ชำระ</th><th>เบี้ย/ปี</th><th>LINE</th><th>สถานะ</th></tr></thead>
       <tbody></tbody>
     </table></div>
     <div class="empty" id="appEmpty" style="display:none">ไม่พบใบสมัคร</div>
@@ -187,6 +229,8 @@ tbody tr:hover{background:var(--navy-soft)}
   </div>
 </div>
 
+<div class="toast" id="toast"></div>
+
 <script>
 const SUPABASE_URL = 'https://lrhatlgcmnpusopodvkn.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_evCIJ86lBvwQY9gSiMtO7w_y7PGtloz';
@@ -194,20 +238,32 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const fmt = n => (+n||0).toLocaleString('th-TH');
 const dfmt = s => new Date(s).toLocaleDateString('th-TH',{day:'numeric',month:'short',year:'2-digit'});
 const dtfmt = s => new Date(s).toLocaleString('th-TH',{day:'numeric',month:'short',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+const one = x => Array.isArray(x) ? x[0] : x; // ความสัมพันธ์ 1:1 คืน object เดี่ยว
 
 const STATUS = {
-  DRAFT:                 {t:'ร่าง',                 c:'b-grey', i:'✎'},
-  SLIP_UPLOADED:         {t:'แนบสลิปแล้ว',          c:'b-grey', i:'📎'},
-  PENDING_ADVISOR_REVIEW:{t:'รอเจ้าหน้าที่ตรวจ',    c:'b-warn', i:'⏳'},
-  PENDING_UNDERWRITING:  {t:'ส่งบริษัท รอพิจารณา',  c:'b-navy', i:'📋'},
-  APPROVED:              {t:'อนุมัติแล้ว',           c:'b-ok',   i:'✓'},
-  REJECTED:              {t:'ปฏิเสธ',               c:'b-bad',  i:'✕'},
-  CANCELLED:             {t:'ยกเลิก',               c:'b-grey', i:'—'},
+  DRAFT:                 {t:'ร่าง',                c:'b-grey', i:'✎', seg:'var(--c-grey)'},
+  SLIP_UPLOADED:         {t:'แนบสลิปแล้ว',         c:'b-grey', i:'📎', seg:'var(--c-grey)'},
+  PENDING_ADVISOR_REVIEW:{t:'รอเจ้าหน้าที่ตรวจ',   c:'b-warn', i:'⏳', seg:'var(--c-amber)'},
+  PENDING_UNDERWRITING:  {t:'ส่งบริษัท รอพิจารณา', c:'b-navy', i:'📋', seg:'var(--c-blue)'},
+  APPROVED:              {t:'อนุมัติแล้ว',          c:'b-ok',   i:'✓', seg:'var(--c-green)'},
+  REJECTED:              {t:'ปฏิเสธ',              c:'b-bad',  i:'✕', seg:'var(--c-red)'},
+  CANCELLED:             {t:'ยกเลิก',              c:'b-grey', i:'—', seg:'var(--c-grey)'},
 };
-const PAY_TH = {FULL:'เต็มจำนวน',INST_3:'ผ่อน 3 งวด',INST_4:'ผ่อน 4 งวด',INST_6:'ผ่อน 6 งวด'};
+const PAY = {
+  FULL:  {t:'เต็มจำนวน', seg:'var(--c-indigo)'},
+  INST_3:{t:'ผ่อน 3 งวด', seg:'var(--c-amber)'},
+  INST_4:{t:'ผ่อน 4 งวด', seg:'var(--c-blue)'},
+  INST_6:{t:'ผ่อน 6 งวด', seg:'var(--c-red)'},
+};
 const badge = s => { const x=STATUS[s]||{t:s,c:'b-grey',i:''}; return `<span class="badge ${x.c}">${x.i} ${x.t}</span>`; };
 
 let APPS = [];
+let toastTimer=null;
+function toast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3200);
+}
 
 /* ===== auth ===== */
 async function init(){
@@ -252,22 +308,23 @@ async function loadData(){
     return;
   }
   APPS = data||[];
-  renderStats(); renderChart(); renderDue(); renderTable();
+  renderStats(); renderPlanChart(); renderProps(); renderDue(); renderTable();
 }
 
 function renderStats(){
   const today = new Date(); today.setHours(0,0,0,0);
   const active = APPS.filter(a=>!['REJECTED','CANCELLED'].includes(a.status));
-  document.getElementById('stToday').textContent   = fmt(APPS.filter(a=>new Date(a.created_at)>=today).length);
-  document.getElementById('stPending').textContent = fmt(APPS.filter(a=>a.status==='PENDING_ADVISOR_REVIEW').length);
-  document.getElementById('stTotal').textContent   = fmt(APPS.length);
-  document.getElementById('stPremium').innerHTML   = fmt(active.reduce((s,a)=>s+(a.annual_premium||0),0))+' <small>บาท</small>';
+  document.getElementById('stToday').textContent    = fmt(APPS.filter(a=>new Date(a.created_at)>=today).length);
+  document.getElementById('stPending').textContent  = fmt(APPS.filter(a=>a.status==='PENDING_ADVISOR_REVIEW').length);
+  document.getElementById('stApproved').textContent = fmt(APPS.filter(a=>a.status==='APPROVED').length);
+  document.getElementById('stPremium').innerHTML    = fmt(active.reduce((s,a)=>s+(a.annual_premium||0),0))+' <small>บาท</small>';
 }
 
-function renderChart(){
+function renderPlanChart(){
   const cnt={1:0,2:0,3:0};
   APPS.forEach(a=>{ if(cnt[a.plan_id]!==undefined) cnt[a.plan_id]++; });
   const max=Math.max(1,cnt[1],cnt[2],cnt[3]);
+  document.getElementById('planTotal').textContent='รวม '+fmt(APPS.length)+' ใบ';
   document.getElementById('planChart').innerHTML=[1,2,3].map(i=>`
     <div class="hb-row">
       <span class="hb-lbl">Plus ${i}</span>
@@ -276,15 +333,35 @@ function renderChart(){
     </div>`).join('');
 }
 
+/* แถบสัดส่วน 100% + legend (จุดสี+ป้ายชื่อ+จำนวน — ไม่พึ่งสีอย่างเดียว) */
+function renderProp(barId,legendId,counts,meta){
+  const entries=Object.entries(counts).filter(([,n])=>n>0);
+  const total=entries.reduce((s,[,n])=>s+n,0)||1;
+  document.getElementById(barId).innerHTML=entries.map(([k,n])=>
+    `<div class="seg" style="width:${n/total*100}%;background:${meta[k].seg}" title="${meta[k].t}: ${n}"></div>`).join('')
+    ||'<div class="empty" style="padding:0;font-size:12px;width:100%">ยังไม่มีข้อมูล</div>';
+  document.getElementById(legendId).innerHTML=entries.map(([k,n])=>
+    `<span class="li"><span class="dot" style="background:${meta[k].seg}"></span>${meta[k].t} <b>${n}</b> (${Math.round(n/total*100)}%)</span>`).join('');
+}
+function renderProps(){
+  const st={},py={};
+  APPS.forEach(a=>{ st[a.status]=(st[a.status]||0)+1; py[a.pay_mode]=(py[a.pay_mode]||0)+1; });
+  renderProp('statusBar','statusLegend',
+    Object.fromEntries(Object.keys(STATUS).map(k=>[k,st[k]||0])), STATUS);
+  renderProp('payBar','payLegend',
+    Object.fromEntries(Object.keys(PAY).map(k=>[k,py[k]||0])), PAY);
+}
+
 function renderDue(){
   const now=new Date(); now.setHours(0,0,0,0);
   const lim=new Date(now); lim.setDate(lim.getDate()+7);
   const rows=[];
   APPS.forEach(a=>(a.payment_installments||[]).forEach(i=>{
     const d=new Date(i.due_date);
+    const ap=one(a.applicants)||{};
     if(i.status==='PENDING' && d>=now && d<=lim)
       rows.push({ref:a.ref_no,no:i.inst_no,due:i.due_date,amt:i.amount,
-                 who:(a.applicants?.[0]?.full_name||'')+' / '+(a.applicants?.[0]?.phone||'')});
+                 who:(ap.full_name||'–')+' / '+(ap.phone||'–')});
   }));
   rows.sort((x,y)=>x.due<y.due?-1:1);
   const tb=document.querySelector('#dueTbl tbody');
@@ -297,23 +374,26 @@ function renderTable(){
   const q=(document.getElementById('q').value||'').toLowerCase();
   const st=document.getElementById('stFilter').value;
   const rows=APPS.filter(a=>{
+    const ap=one(a.applicants)||{};
     if(st && a.status!==st) return false;
     if(!q) return true;
-    const hay=(a.ref_no+' '+(a.applicants?.[0]?.full_name||'')+' '+(a.applicants?.[0]?.phone||'')).toLowerCase();
-    return hay.includes(q);
+    return (a.ref_no+' '+(ap.full_name||'')+' '+(ap.phone||'')).toLowerCase().includes(q);
   });
+  document.getElementById('tblCount').textContent=fmt(rows.length)+' รายการ';
   const tb=document.querySelector('#appTbl tbody');
-  tb.innerHTML=rows.map((a,i)=>`
-    <tr onclick="openModal(${a.app_id})">
+  tb.innerHTML=rows.map(a=>{
+    const ap=one(a.applicants)||{};
+    return `<tr onclick="openModal(${a.app_id})">
       <td class="mono">${a.ref_no}</td>
       <td>${dtfmt(a.created_at)}</td>
       <td>${(a.plans?.plan_name||'').replace('Fin for Kids ','')}</td>
-      <td>${a.applicants?.[0]?.full_name||'–'}</td>
-      <td>${a.applicants?.[0]?.phone||'–'}</td>
-      <td>${PAY_TH[a.pay_mode]||a.pay_mode}</td>
+      <td class="who"><div class="nm">${ap.full_name||'–'}</div><div class="ph">${ap.phone||''}</div></td>
+      <td>${PAY[a.pay_mode]?.t||a.pay_mode}</td>
       <td class="money">${fmt(a.annual_premium)}</td>
+      <td>${a.line_user_id?'💬':'–'}</td>
       <td>${badge(a.status)}</td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
   document.getElementById('appTbl').style.display=rows.length?'table':'none';
   document.getElementById('appEmpty').style.display=rows.length?'none':'block';
 }
@@ -322,32 +402,32 @@ function renderTable(){
 const DOC_TH={PARENT_ID_CARD:'บัตร ปชช. ผู้ปกครอง',CHILD_BIRTH_CERT:'สูติบัตรบุตร',PAYMENT_SLIP:'สลิปโอนเงิน'};
 async function openModal(id){
   const a=APPS.find(x=>x.app_id===id); if(!a) return;
-  const ap=a.applicants?.[0]||{}, ad=a.addresses?.[0]||{};
+  const ap=one(a.applicants)||{}, ad=one(a.addresses)||{};
   const insts=(a.payment_installments||[]).sort((x,y)=>x.inst_no-y.inst_no);
   document.getElementById('modalBody').innerHTML=`
-    <h3 class="h-title" style="padding-right:26px">${a.ref_no} · ${badge(a.status)}</h3>
+    <h3 class="kanit" style="color:var(--navy);font-size:17px;padding-right:26px;margin-bottom:10px">${a.ref_no} · ${badge(a.status)}</h3>
     <div class="kv">
       <span class="k">วันที่สมัคร</span><span class="v">${dtfmt(a.created_at)}</span>
       <span class="k">แผน / ช่วงอายุ</span><span class="v">${a.plans?.plan_name||''} · ${a.age_group}</span>
-      <span class="k">เบี้ยรายปี</span><span class="v">${fmt(a.annual_premium)} บาท · ${PAY_TH[a.pay_mode]||a.pay_mode}</span>
+      <span class="k">เบี้ยรายปี</span><span class="v">${fmt(a.annual_premium)} บาท · ${PAY[a.pay_mode]?.t||a.pay_mode}</span>
       <span class="k">ผู้ปกครอง</span><span class="v">${ap.full_name||'–'}</span>
       <span class="k">ติดต่อ</span><span class="v">${ap.phone||'–'} · ${ap.email||'–'}</span>
       <span class="k">อาชีพ / สูง / หนัก</span><span class="v">${ap.occupation||'–'} · ${ap.height_cm||'–'} ซม. · ${ap.weight_kg||'–'} กก.</span>
       <span class="k">ที่อยู่จัดส่ง</span><span class="v">${ad.address_text||''} ต.${ad.sub_district||''} อ.${ad.district||''} จ.${ad.province||''} ${ad.postal_code||''}</span>
-      <span class="k">ช่องทาง</span><span class="v">${a.utm_source||'-'}</span>
+      <span class="k">ช่องทาง / LINE</span><span class="v">${a.utm_source||'-'} · ${a.line_user_id?'💬 แจ้งผลทาง LINE ได้':'ไม่มี LINE userId'}</span>
     </div>
-    <h3 class="h-title" style="font-size:15px">เอกสารแนบ</h3>
+    <div class="sec-head"><h3 style="font-size:15px">เอกสารแนบ</h3></div>
     <div class="doc-grid" id="docGrid">กำลังโหลดรูป...</div>
-    <h3 class="h-title" style="font-size:15px">งวดชำระ</h3>
+    <div class="sec-head"><h3 style="font-size:15px">งวดชำระ</h3></div>
     <table class="inst-tbl"><thead><tr><th>งวด</th><th>ครบกำหนด</th><th>ยอด</th><th>สถานะ</th></tr></thead>
     <tbody>${insts.map(i=>`<tr><td>${i.inst_no}</td><td>${dfmt(i.due_date)}</td><td>${fmt(i.amount)}</td><td>${i.status==='PENDING'?'⏳ รอชำระ':'✓ '+i.status}</td></tr>`).join('')}</tbody></table>
-    <h3 class="h-title" style="font-size:15px">เปลี่ยนสถานะ</h3>
+    <div class="sec-head"><h3 style="font-size:15px">เปลี่ยนสถานะ</h3></div>
     <div class="status-row">
-      <select id="newStatus">${Object.entries(STATUS).filter(([k])=>k!=='DRAFT'&&k!=='SLIP_UPLOADED').map(([k,v])=>`<option value="${k}" ${a.status===k?'selected':''}>${v.t}</option>`).join('')}</select>
-      <button class="btn btn-navy" onclick="saveStatus(${a.app_id})">บันทึกสถานะ</button>
-    </div>`;
+      <select id="newStatus">${Object.entries(STATUS).filter(([k])=>k!=='DRAFT'&&k!=='SLIP_UPLOADED').map(([k,v])=>`<option value="${k}" ${a.status===k?'selected':''}>${v.i} ${v.t}</option>`).join('')}</select>
+      <button class="btn btn-navy" id="saveStBtn" onclick="saveStatus(${a.app_id})">บันทึกสถานะ</button>
+    </div>
+    <div class="approve-note">💡 เมื่อเปลี่ยนเป็น "✓ อนุมัติแล้ว" ระบบจะส่งการ์ดแจ้งลูกค้าทาง LINE อัตโนมัติ (บริษัทรับข้อมูลแล้ว · กรมธรรม์ออกภายใน 15 วันทำการ)</div>`;
   document.getElementById('overlay').classList.add('show');
-  // เซ็นลิงก์ไฟล์แนบ (หมดอายุใน 1 ชม.)
   const grid=document.getElementById('docGrid');
   const docs=a.documents||[];
   if(!docs.length){ grid.innerHTML='<span class="empty">ไม่มีไฟล์แนบ</span>'; return; }
@@ -362,10 +442,23 @@ async function openModal(id){
   grid.innerHTML=items.join('');
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
 async function saveStatus(id){
   const st=document.getElementById('newStatus').value;
+  const btn=document.getElementById('saveStBtn');
+  btn.disabled=true; btn.textContent='กำลังบันทึก...';
   const {error}=await sb.from('applications').update({status:st}).eq('app_id',id);
-  if(error){ alert('บันทึกไม่สำเร็จ: '+error.message); return; }
+  if(error){ btn.disabled=false; btn.textContent='บันทึกสถานะ'; toast('❌ บันทึกไม่สำเร็จ: '+error.message); return; }
+  if(st==='APPROVED'){
+    btn.textContent='กำลังส่งการ์ดแจ้งลูกค้า...';
+    try{
+      const {data,error:fe}=await sb.functions.invoke('notify-approved',{body:{app_id:id}});
+      if(fe||!data?.ok) toast('✓ บันทึกสถานะแล้ว แต่ส่งการ์ด LINE ไม่สำเร็จ: '+(data?.message||fe?.message||''));
+      else toast('✅ บันทึกสถานะ และส่งการ์ดแจ้งลูกค้าทาง LINE แล้ว');
+    }catch(e){ toast('✓ บันทึกสถานะแล้ว แต่ส่งการ์ด LINE ไม่สำเร็จ'); }
+  }else{
+    toast('✓ บันทึกสถานะเรียบร้อย');
+  }
   closeModal(); loadData();
 }
 
