@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Anuphan:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <style>
 :root{
   --fin-red:#E2222D;
@@ -441,6 +442,16 @@ input,select,textarea{font-family:inherit;font-size:16px}
 const SUPABASE_URL = 'https://lrhatlgcmnpusopodvkn.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_evCIJ86lBvwQY9gSiMtO7w_y7PGtloz';
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ================= LINE LIFF ================= */
+/* ใส่ LIFF ID จาก LINE Developers Console เช่น '1234567890-AbcdEfgh' */
+const LIFF_ID = '2005495388-S62xumht';
+let liffOk = false;
+(async () => {
+  if (!window.liff || LIFF_ID.startsWith('REPLACE')) return;
+  try { await liff.init({ liffId: LIFF_ID }); liffOk = true; }
+  catch (e) { console.warn('LIFF init failed', e); }
+})();
 const submissionId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + '-' + Math.random().toString(36).slice(2));
 
 /* ================= DATA ================= */
@@ -772,6 +783,46 @@ const ERROR_TH={
   UPLOAD_FAILED:'อัปโหลดเอกสารไม่สำเร็จ กรุณาตรวจสอบอินเทอร์เน็ตแล้วลองใหม่',
 };
 
+/* ================= FLEX MESSAGE ================= */
+function buildFlex(refNo,planName,annual,payText,firstAmt){
+  const row=(k,v)=>({type:'box',layout:'horizontal',contents:[
+    {type:'text',text:k,size:'sm',color:'#5A5F6E',flex:4},
+    {type:'text',text:v,size:'sm',color:'#1B1464',weight:'bold',align:'end',flex:6,wrap:true}
+  ]});
+  return {
+    type:'flex',
+    altText:'✅ ส่งคำขอทำประกัน FIN FOR KIDS PLUS เรียบร้อยแล้ว · เลขอ้างอิง '+refNo,
+    contents:{
+      type:'bubble',
+      header:{type:'box',layout:'vertical',backgroundColor:'#E2222D',paddingAll:'16px',contents:[
+        {type:'text',text:'FIN FOR KIDS PLUS',color:'#FFFFFF',weight:'bold',size:'lg'},
+        {type:'text',text:'ส่งคำขอเอาประกันภัยเรียบร้อยแล้ว ✓',color:'#FFE1E3',size:'sm'}
+      ]},
+      body:{type:'box',layout:'vertical',spacing:'md',paddingAll:'16px',contents:[
+        {type:'box',layout:'vertical',backgroundColor:'#EDECF6',cornerRadius:'10px',paddingAll:'12px',contents:[
+          {type:'text',text:'หมายเลขอ้างอิงคำขอ',size:'xxs',color:'#5A5F6E'},
+          {type:'text',text:refNo,size:'xl',weight:'bold',color:'#1B1464'}
+        ]},
+        row('แผนประกัน',planName),
+        row('เบี้ยรายปี',fmt(annual)+' บาท'),
+        row('การชำระเงิน',payText),
+        row('ชำระงวดแรกแล้ว',fmt(firstAmt)+' บาท'),
+        {type:'separator'},
+        {type:'text',wrap:true,size:'xs',color:'#5A5F6E',
+         text:'เจ้าหน้าที่ผู้มีใบอนุญาตจะตรวจสอบข้อมูลและติดต่อกลับภายใน 1 วันทำการ · ความคุ้มครองโรคที่ระบุเริ่มเมื่อพ้นระยะรอคอย 15 วันนับจากวันที่กรมธรรม์มีผลบังคับ'}
+      ]}
+    }
+  };
+}
+
+/* ส่ง Flex เข้าห้องแชท (ทำงานเฉพาะเปิดผ่าน LIFF ในแอป LINE — นอกนั้นข้ามเงียบ ๆ ไม่กระทบการสมัคร) */
+async function sendLineFlex(refNo,planName,annual,payText,firstAmt){
+  try{
+    if(!liffOk||!liff.isInClient()||!liff.isApiAvailable('sendMessages')) return;
+    await liff.sendMessages([buildFlex(refNo,planName,annual,payText,firstAmt)]);
+  }catch(e){ console.warn('send flex failed',e); }
+}
+
 let submitting=false;
 async function submitApp(){
   if(submitting) return;
@@ -861,8 +912,12 @@ async function submitApp(){
 
     // 3) แสดงผลจากเซิร์ฟเวอร์ (เลขอ้างอิง/ยอดจริง)
     const p=PLANS[state.plan];
+    const payText=state.payMode==='full'?'ชำระเต็มจำนวน':'ผ่อน '+state.payMode+' งวด 0%';
     document.getElementById('refNo').textContent=data.ref_no;
-    document.getElementById('thanksSum').innerHTML=`${p.name} · เบี้ยรายปี ${fmt(data.annual_premium)} บาท · ${state.payMode==='full'?'ชำระเต็มจำนวน':'ผ่อน '+state.payMode+' งวด'} · ชำระงวดแรกแล้ว ${fmt(data.first_amount)} บาท`;
+    document.getElementById('thanksSum').innerHTML=`${p.name} · เบี้ยรายปี ${fmt(data.annual_premium)} บาท · ${payText} · ชำระงวดแรกแล้ว ${fmt(data.first_amount)} บาท`;
+
+    // 4) ส่ง Flex Message ยืนยันเข้าห้องแชท LINE (ถ้าเปิดผ่าน LIFF)
+    await sendLineFlex(data.ref_no,p.name,data.annual_premium,payText,data.first_amount);
     goStep(5);
   }catch(e){
     console.error(e);
