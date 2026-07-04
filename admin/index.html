@@ -813,6 +813,7 @@ function openAddForm(){
     <h3 class="kanit" style="color:var(--navy);font-size:17px;padding-right:26px;margin-bottom:12px">➕ เพิ่มรายการใบสมัคร (โดยแอดมิน)</h3>
     <div class="sec-head"><h3 style="font-size:15px">แผนประกัน</h3></div>
     <div class="efgrid">
+      <div class="fld full"><label>📅 วันที่ทำรายการ</label><input id="nDate" type="date"></div>
       <div class="fld"><label>ช่วงอายุบุตร</label><select id="nAge" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px">
         <option value="INFANT">👶 15 วัน – &lt;1 ปี</option><option value="TODDLER" selected>🧒 1 – 5 ปี</option><option value="KID">🎒 6 – 20 ปี</option></select></div>
       <div class="fld"><label>แผน</label><select id="nPlan" style="width:100%;border:1.5px solid var(--line);border-radius:10px;padding:10px 12px">
@@ -852,6 +853,8 @@ function openAddForm(){
       <button class="btn btn-red" id="addSaveBtn" onclick="submitAdd()">💾 บันทึกรายการ</button>
       <button class="btn btn-ghost" onclick="closeModal()">ยกเลิก</button>
     </div>`;
+  const t=new Date();
+  document.getElementById('nDate').value=t.getFullYear()+'-'+pad2(t.getMonth()+1)+'-'+pad2(t.getDate());
   document.getElementById('overlay').classList.add('show');
 }
 async function submitAdd(){
@@ -890,6 +893,7 @@ async function submitAdd(){
     if(bc) docs.child_birth_cert=bc;
     const payload={
       plan_id:+v('nPlan'), age_group:v('nAge'), pay_mode:v('nPay'),
+      made_date:v('nDate')||null,
       pdpa_consent:true, utm_source:'admin',
       parent:{full_name:v('nName'),phone:v('nPhone'),email:v('nEmail'),occupation:v('nJob'),
               citizen_id:v('nCid')||null,height_cm:0,weight_kg:0},
