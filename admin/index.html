@@ -39,6 +39,9 @@ input,select{font-family:inherit;font-size:15px}
 .btn-outline-red{background:#fff;color:var(--fin-red);border:2px solid var(--fin-red)}
 .btn-outline-red:hover{background:var(--fin-red-soft)}
 .btn-ok{background:var(--ok);color:#fff}
+.btn-line{background:#06C755;color:#fff}
+.btn-line:hover{background:#05B24C}
+.btn-xs{font-size:12.5px;padding:6px 12px;border-radius:8px}
 .btn:disabled{background:#C9CBD6;color:#fff;cursor:not-allowed}
 
 .wrap{max-width:1120px;margin:0 auto;padding:20px 18px 70px}
@@ -300,7 +303,7 @@ tbody tr:hover{background:var(--navy-soft)}
   <div class="card">
     <div class="sec-head"><h3>งวดผ่อนครบกำหนดใน 7 วัน</h3></div>
     <div class="tbl-scroll"><table id="dueTbl" style="min-width:560px">
-      <thead><tr><th>เลขอ้างอิง</th><th>งวดที่</th><th>ครบกำหนด</th><th>ยอด (บาท)</th><th>ผู้ปกครอง / เบอร์โทร</th></tr></thead>
+      <thead><tr><th>เลขอ้างอิง</th><th>งวดที่</th><th>ครบกำหนด</th><th>ยอด (บาท)</th><th>ผู้ปกครอง / เบอร์โทร</th><th>แจ้งเตือน</th></tr></thead>
       <tbody></tbody>
     </table></div>
     <div class="empty" id="dueEmpty" style="display:none">ไม่มีงวดครบกำหนดใน 7 วันนี้ 🎉</div>
@@ -651,12 +654,13 @@ function renderDue(){
     const d=new Date(i.due_date);
     const ap=one(a.applicants)||{};
     if(i.status==='PENDING' && d>=now && d<=lim)
-      rows.push({ref:a.ref_no,no:i.inst_no,due:i.due_date,amt:i.amount,
+      rows.push({id:a.app_id,line:a.line_user_id,ref:a.ref_no,no:i.inst_no,due:i.due_date,amt:i.amount,
                  who:(ap.full_name||'–')+' / '+(ap.phone||'–')});
   }));
   rows.sort((x,y)=>x.due<y.due?-1:1);
   const tb=document.querySelector('#dueTbl tbody');
-  tb.innerHTML=rows.map(r=>`<tr style="cursor:default"><td class="mono">${r.ref}</td><td>${r.no}</td><td>${dfmt(r.due)}</td><td class="money">${fmt(r.amt)}</td><td>${r.who}</td></tr>`).join('');
+  tb.innerHTML=rows.map(r=>`<tr style="cursor:default"><td class="mono">${r.ref}</td><td>${r.no}</td><td>${dfmt(r.due)}</td><td class="money">${fmt(r.amt)}</td><td>${r.who}</td>
+    <td>${r.line?`<button class="btn btn-line btn-xs" onclick="event.stopPropagation();pushInstallment(${r.id},this)">🔔 LINE</button>`:'<span style="color:var(--grey);font-size:12px">ไม่มี LINE</span>'}</td></tr>`).join('');
   document.getElementById('dueTbl').style.display=rows.length?'table':'none';
   document.getElementById('dueEmpty').style.display=rows.length?'none':'block';
 }
@@ -681,7 +685,7 @@ function renderTable(){
       <td class="who"><div class="nm">${ap.full_name||'–'}</div><div class="ph">${ap.phone||''}</div></td>
       <td>${PAY[a.pay_mode]?.t||a.pay_mode}</td>
       <td class="money">${fmt(a.annual_premium)}</td>
-      <td>${a.line_user_id?'💬':'–'}</td>
+      <td>${a.line_user_id?`<span title="${(a.line_display_name||'').replace(/"/g,'&quot;')}">💬</span>`:'–'}</td>
       <td>${badge(a.status)}</td>
     </tr>`;
   }).join('');
@@ -705,11 +709,12 @@ async function openModal(id){
       <span class="k">ติดต่อ</span><span class="v">${ap.phone||'–'} · ${ap.email||'–'}</span>
       <span class="k">อาชีพ / สูง / หนัก</span><span class="v">${ap.occupation||'–'} · ${ap.height_cm||'–'} ซม. · ${ap.weight_kg||'–'} กก.</span>
       <span class="k">ที่อยู่จัดส่ง</span><span class="v">${ad.address_text||''} ต.${ad.sub_district||''} อ.${ad.district||''} จ.${ad.province||''} ${ad.postal_code||''}</span>
-      <span class="k">ช่องทาง / LINE</span><span class="v">${a.utm_source||'-'} · ${a.line_user_id?'💬 แจ้งผลทาง LINE ได้':'ไม่มี LINE userId'}</span>
+      <span class="k">ช่องทาง / LINE</span><span class="v">${a.utm_source||'-'} · ${a.line_user_id?'💬 '+(a.line_display_name||'เชื่อมต่อ LINE แล้ว')+' — แจ้งเตือนทาง LINE ได้':'ไม่มี LINE userId'}</span>
     </div>
     <div class="sec-head"><h3 style="font-size:15px">เอกสารแนบ</h3></div>
     <div class="doc-grid" id="docGrid">กำลังโหลดรูป...</div>
-    <div class="sec-head"><h3 style="font-size:15px">งวดชำระ</h3></div>
+    <div class="sec-head" style="justify-content:space-between"><h3 style="font-size:15px">งวดชำระ</h3>
+      ${a.line_user_id&&insts.some(i=>i.status==='PENDING'||i.status==='OVERDUE')?`<button class="btn btn-line btn-xs" onclick="pushInstallment(${a.app_id},this)">🔔 แจ้งเตือนงวดถัดไปทาง LINE</button>`:''}</div>
     <table class="inst-tbl"><thead><tr><th>งวด</th><th>ครบกำหนด</th><th>ยอด</th><th>สถานะ</th></tr></thead>
     <tbody>${insts.map(i=>`<tr><td>${i.inst_no}</td><td>${dfmt(i.due_date)}</td><td>${fmt(i.amount)}</td><td>${i.status==='PENDING'?'⏳ รอชำระ':'✓ '+i.status}</td></tr>`).join('')}</tbody></table>
     <div class="sec-head"><h3 style="font-size:15px">เปลี่ยนสถานะ</h3></div>
@@ -737,6 +742,25 @@ async function openModal(id){
   grid.innerHTML=items.join('');
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+
+/* ===== ส่งแจ้งเตือนงวดถัดไปให้ลูกค้าทาง LINE (Push Message) ===== */
+async function pushInstallment(id,btn){
+  const a=APPS.find(x=>x.app_id===id); if(!a) return;
+  if(!a.line_user_id){ toast('ใบสมัครนี้ไม่มี LINE userId'); return; }
+  const insts=(a.payment_installments||[]).slice().sort((x,y)=>x.inst_no-y.inst_no);
+  const nx=insts.find(i=>i.status==='PENDING'||i.status==='OVERDUE');
+  if(!nx){ toast('ลูกค้าชำระครบทุกงวดแล้ว 🎉'); return; }
+  const who=a.line_display_name?`${a.line_display_name} (LINE)`:'ลูกค้า';
+  if(!confirm(`ส่งข้อความแจ้งเตือนทาง LINE ถึง ${who}\n\n${a.ref_no} · งวดที่ ${nx.inst_no} ยอด ${fmt(nx.amount)} บาท\nครบกำหนด ${dfmt(nx.due_date)}\n\nยืนยันส่ง?`)) return;
+  const old=btn?btn.textContent:'';
+  if(btn){ btn.disabled=true; btn.textContent='⏳ กำลังส่ง...'; }
+  try{
+    const {data,error}=await sb.functions.invoke('push-installment',{body:{app_id:id}});
+    if(error||!data?.ok) toast('❌ ส่งไม่สำเร็จ: '+(data?.message||error?.message||'ไม่ทราบสาเหตุ'));
+    else toast(`✅ ส่งแจ้งเตือนงวดที่ ${data.inst_no} ให้ ${who} แล้ว`);
+  }catch(e){ toast('❌ ส่งไม่สำเร็จ: '+(e.message||e)); }
+  if(btn){ btn.disabled=false; btn.textContent=old; }
+}
 
 /* ===== แก้ไขข้อมูลผู้สมัคร/ที่อยู่ ===== */
 function editApp(id){
