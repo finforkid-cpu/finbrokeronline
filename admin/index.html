@@ -770,7 +770,7 @@ function renderDue(){
   rows.sort((x,y)=>x.due<y.due?-1:1);
   const tb=document.querySelector('#dueTbl tbody');
   tb.innerHTML=rows.map(r=>`<tr style="cursor:default"><td class="mono">${r.ref}</td><td>${r.no}</td><td>${dfmt(r.due)}</td><td class="money">${fmt(r.amt)}</td><td>${r.who}</td>
-    <td>${r.line?`<button class="btn btn-line btn-xs" onclick="event.stopPropagation();pushInstallment(${r.id},this)">🔔 LINE</button>`:'<span style="color:var(--grey);font-size:12px">ไม่มี LINE</span>'}</td></tr>`).join('');
+    <td>${r.line?`<button class="btn btn-line btn-xs" onclick="event.stopPropagation();pushInstallment(${r.id},null,this)">🔔 LINE</button>`:'<span style="color:var(--grey);font-size:12px">ไม่มี LINE</span>'}</td></tr>`).join('');
   document.getElementById('dueTbl').style.display=rows.length?'table':'none';
   document.getElementById('dueEmpty').style.display=rows.length?'none':'block';
 }
@@ -824,9 +824,19 @@ async function openModal(id){
     <div class="sec-head"><h3 style="font-size:15px">เอกสารแนบ</h3></div>
     <div class="doc-grid" id="docGrid">กำลังโหลดรูป...</div>
     <div class="sec-head" style="justify-content:space-between"><h3 style="font-size:15px">งวดชำระ</h3>
-      ${a.line_user_id&&insts.some(i=>i.status==='PENDING'||i.status==='OVERDUE')?`<button class="btn btn-line btn-xs" onclick="pushInstallment(${a.app_id},this)">🔔 แจ้งเตือนงวดถัดไปทาง LINE</button>`:''}</div>
-    <table class="inst-tbl"><thead><tr><th>งวด</th><th>ครบกำหนด</th><th>ยอด</th><th>สถานะ</th></tr></thead>
-    <tbody>${insts.map(i=>`<tr><td>${i.inst_no}</td><td>${dfmt(i.due_date)}</td><td>${fmt(i.amount)}</td><td>${i.status==='PENDING'?'⏳ รอชำระ':'✓ '+i.status}</td></tr>`).join('')}</tbody></table>
+      ${a.line_user_id&&insts.some(i=>i.status==='PENDING'||i.status==='OVERDUE')?`<button class="btn btn-line btn-xs" onclick="pushInstallment(${a.app_id},null,this)">🔔 แจ้งเตือนงวดถัดไปทาง LINE</button>`:''}</div>
+    <table class="inst-tbl"><thead><tr><th>งวด</th><th>ครบกำหนด</th><th>ยอด</th><th>สถานะ</th><th>จัดการ</th></tr></thead>
+    <tbody>${insts.map(i=>{
+      const unpaid=i.status==='PENDING'||i.status==='OVERDUE';
+      const stTxt=i.status==='VERIFIED'?'✅ ชำระแล้ว':i.status==='SLIP_UPLOADED'?'📎 แนบสลิป':i.status==='OVERDUE'?'⚠️ เกินกำหนด':'⏳ รอชำระ';
+      const rem=i.reminded_at?' <span title="ส่งแจ้งเตือนแล้ว" style="color:var(--ok)">🔔</span>':'';
+      const remindBtn=(unpaid&&a.line_user_id)?`<button class="btn btn-line btn-xs" onclick="pushInstallment(${a.app_id},${i.inst_id},this)">🔔 เตือน</button>`:'';
+      const payBtn=i.status==='VERIFIED'
+        ?`<button class="btn btn-ghost btn-xs" onclick="markInstallment(${i.inst_id},'PENDING',${a.app_id})">↩ รอชำระ</button>`
+        :`<button class="btn btn-ok btn-xs" onclick="markInstallment(${i.inst_id},'VERIFIED',${a.app_id})">✓ ชำระแล้ว</button>`;
+      return `<tr><td>${i.inst_no}</td><td>${dfmt(i.due_date)}</td><td>${fmt(i.amount)}</td><td>${stTxt}${rem}</td>
+        <td><div style="display:flex;gap:5px;flex-wrap:wrap">${remindBtn}${payBtn}</div></td></tr>`;
+    }).join('')}</tbody></table>
     <div class="sec-head"><h3 style="font-size:15px">เปลี่ยนสถานะ</h3></div>
     <div class="status-row">
       <select id="newStatus">${Object.entries(STATUS).filter(([k])=>k!=='DRAFT'&&k!=='SLIP_UPLOADED').map(([k,v])=>`<option value="${k}" ${a.status===k?'selected':''}>${v.i} ${v.t}</option>`).join('')}</select>
@@ -853,23 +863,34 @@ async function openModal(id){
 }
 function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
 
-/* ===== ส่งแจ้งเตือนงวดถัดไปให้ลูกค้าทาง LINE (Push Message) ===== */
-async function pushInstallment(id,btn){
+/* ===== ส่งแจ้งเตือนงวดให้ลูกค้าทาง LINE — ระบุงวด (instId) หรือเว้นว่าง=งวดค้างเก่าสุด ===== */
+async function pushInstallment(id,instId,btn){
   const a=APPS.find(x=>x.app_id===id); if(!a) return;
   if(!a.line_user_id){ toast('ใบสมัครนี้ไม่มี LINE userId'); return; }
   const insts=(a.payment_installments||[]).slice().sort((x,y)=>x.inst_no-y.inst_no);
-  const nx=insts.find(i=>i.status==='PENDING'||i.status==='OVERDUE');
-  if(!nx){ toast('ลูกค้าชำระครบทุกงวดแล้ว 🎉'); return; }
+  const target=instId?insts.find(i=>i.inst_id===instId):insts.find(i=>i.status==='PENDING'||i.status==='OVERDUE');
+  if(!target){ toast(instId?'ไม่พบงวดที่ระบุ':'ลูกค้าชำระครบทุกงวดแล้ว 🎉'); return; }
   const who=a.line_display_name?`${a.line_display_name} (LINE)`:'ลูกค้า';
-  if(!confirm(`ส่งข้อความแจ้งเตือนทาง LINE ถึง ${who}\n\n${a.ref_no} · งวดที่ ${nx.inst_no} ยอด ${fmt(nx.amount)} บาท\nครบกำหนด ${dfmt(nx.due_date)}\n\nยืนยันส่ง?`)) return;
+  if(!confirm(`ส่งข้อความแจ้งเตือนทาง LINE ถึง ${who}\n\n${a.ref_no} · งวดที่ ${target.inst_no} ยอด ${fmt(target.amount)} บาท\nครบกำหนด ${dfmt(target.due_date)}\n\nยืนยันส่ง?`)) return;
   const old=btn?btn.textContent:'';
   if(btn){ btn.disabled=true; btn.textContent='⏳ กำลังส่ง...'; }
   try{
-    const {data,error}=await sb.functions.invoke('push-installment',{body:{app_id:id}});
+    const {data,error}=await sb.functions.invoke('push-installment',{body:{app_id:id,inst_id:target.inst_id}});
     if(error||!data?.ok) toast('❌ ส่งไม่สำเร็จ: '+(data?.message||error?.message||'ไม่ทราบสาเหตุ'));
-    else toast(`✅ ส่งแจ้งเตือนงวดที่ ${data.inst_no} ให้ ${who} แล้ว`);
+    else { toast(`✅ ส่งแจ้งเตือนงวดที่ ${data.inst_no} ให้ ${who} แล้ว`); await loadData(); if(document.getElementById('overlay').classList.contains('show')) openModal(id); }
   }catch(e){ toast('❌ ส่งไม่สำเร็จ: '+(e.message||e)); }
   if(btn){ btn.disabled=false; btn.textContent=old; }
+}
+
+/* ===== แอดมินทำเครื่องหมายงวด: ชำระแล้ว / กลับเป็นรอชำระ ===== */
+async function markInstallment(instId,status,appId){
+  const label=status==='VERIFIED'?'ทำเครื่องหมายว่า "ชำระแล้ว ✓"':'เปลี่ยนกลับเป็น "รอชำระ"';
+  if(!confirm(label+' สำหรับงวดนี้?')) return;
+  const {error}=await sb.rpc('admin_set_installment_status',{p_inst_id:instId,p_status:status});
+  if(error){ toast('❌ อัปเดตไม่สำเร็จ: '+error.message); return; }
+  toast(status==='VERIFIED'?'✅ บันทึกว่าชำระแล้ว':'↩ เปลี่ยนเป็นรอชำระแล้ว');
+  await loadData();
+  if(document.getElementById('overlay').classList.contains('show')) openModal(appId);
 }
 
 /* ===== แก้ไขข้อมูลผู้สมัคร/ที่อยู่ ===== */
