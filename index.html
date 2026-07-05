@@ -86,7 +86,9 @@ input,select,textarea{font-family:inherit;font-size:16px}
 .choice{border:2px solid var(--line);border-radius:14px;padding:16px;background:#fff;text-align:center;transition:.2s;position:relative}
 .choice:hover{border-color:var(--fin-red);transform:translateY(-2px)}
 .choice:active{transform:scale(.97)}
-.choice.selected{border-color:var(--fin-red);background:var(--fin-red-soft)}
+.choice.selected{border-color:var(--fin-red);background:var(--fin-red-soft);box-shadow:0 0 0 3px var(--fin-red-soft)}
+.choice.selected .d{color:var(--fin-red);font-weight:600}
+.choice.selected .tag{background:var(--fin-red);color:#fff}
 .choice .ic{font-size:30px;line-height:1;margin-bottom:8px;display:block;animation:bob 2.8s ease-in-out infinite}
 .choice:nth-child(2) .ic{animation-delay:.4s}
 .choice:nth-child(3) .ic{animation-delay:.8s}
@@ -354,6 +356,13 @@ body.has-ab .wrap{padding-bottom:185px}
   .btn-sm{min-height:42px;padding:9px 14px}
   .back-link{padding:8px 2px;font-size:14.5px}
   .choice{padding:14px}
+  /* การ์ดเลือกช่วงอายุ: 3 ใบเรียงแถวเดียวบนจอมือถือ */
+  #ageGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+  #ageGrid .choice{padding:12px 6px 10px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+  #ageGrid .choice .ic{font-size:28px;margin-bottom:6px}
+  #ageGrid .choice .t{font-size:14.5px;line-height:1.2}
+  #ageGrid .choice .d{font-size:10.5px;line-height:1.35;margin-top:2px;margin-bottom:6px}
+  #ageGrid .choice .tag{font-size:10px;padding:2px 8px;margin-top:auto;max-width:100%}
   .sum-head{padding:9px 14px;font-size:15px}
   .sum-body{padding:12px 14px;font-size:14px}
   .sum-total .v{font-size:21px}
@@ -653,9 +662,9 @@ const submissionId = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now(
 
 /* ================= DATA ================= */
 const AGE_GROUPS = [
-  {key:'infant',  label:'15 วัน – น้อยกว่า 1 ปี', icon:'👶', tag:'คุ้มครอง 5 โรค', min:15/365, max:1},
-  {key:'toddler', label:'1 – 5 ปี',               icon:'🧒', tag:'คุ้มครอง 8 โรค', min:1,  max:6},
-  {key:'kid',     label:'6 – 20 ปี',              icon:'🎒', tag:'คุ้มครอง 8 โรค · เบี้ยเริ่ม 9,150.-', min:6, max:21},
+  {key:'infant',  name:'เบบี๋',   label:'15 วัน – น้อยกว่า 1 ปี', icon:'👶', tag:'คุ้มครอง 5 โรค', min:15/365, max:1},
+  {key:'toddler', name:'วัยซน',   label:'1 – 5 ปี',               icon:'🧒', tag:'คุ้มครอง 8 โรค', min:1,  max:6},
+  {key:'kid',     name:'วัยเรียน', label:'6 – 20 ปี',              icon:'🎒', tag:'คุ้มครอง 8 โรค', min:6, max:21},
 ];
 const PLANS = {
   1:{name:'Fin for Kids Plus 1', accident:20000, ipd:50000,  opd:1000, premium:{infant:24420, toddler:23050, kid:9150}},
@@ -858,7 +867,7 @@ function renderAges(){
   const g=document.getElementById('ageGrid');
   g.innerHTML=AGE_GROUPS.map(a=>`
     <button class="choice ${state.age===a.key?'selected':''}" onclick="pickAge('${a.key}')">
-      <div class="ic">${a.icon}</div><div class="t">อายุ ${a.label}</div><div class="tag">${a.tag}</div>
+      <div class="ic">${a.icon}</div><div class="t">${a.name}</div><div class="d">${a.label}</div><div class="tag">${a.tag}</div>
     </button>`).join('');
 }
 function pickAge(k){
