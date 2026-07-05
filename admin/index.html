@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;500;600;700&family=Anuphan:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="geo-th.js"></script>
 <style>
 :root{
   --fin-red:#E2222D; --fin-red-dark:#B5121C; --fin-red-soft:#FBE9EB;
@@ -18,15 +19,17 @@
   /* ชุดสีกราฟ (ผ่าน validator: lightness/chroma/CVD/contrast) */
   --c-indigo:#4C43CE; --c-amber:#B78103; --c-blue:#4A90D9; --c-red:#E2222D;
   --c-green:#1E9E5A; --c-grey:#8A8FA0;
-  --radius:16px; --shadow:0 4px 20px rgba(27,20,100,.07);
+  --radius:16px;
+  --shadow:0 1px 2px rgba(16,22,64,.04),0 10px 26px rgba(16,22,64,.06);
+  --shadow-lg:0 12px 34px rgba(16,22,64,.11);
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Anuphan',sans-serif;background:var(--bg);color:var(--ink);font-size:15px;line-height:1.6}
+body{font-family:'Anuphan',sans-serif;background:linear-gradient(180deg,#F6F8FC,#EEF1F8);background-attachment:fixed;color:var(--ink);font-size:15px;line-height:1.6}
 h1,h2,h3,.kanit{font-family:'Kanit',sans-serif}
 button{font-family:inherit;cursor:pointer}
 input,select{font-family:inherit;font-size:15px}
 
-.topbar{background:var(--card);border-bottom:4px solid var(--fin-red);padding:12px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10}
+.topbar{background:var(--card);border-bottom:3px solid var(--fin-red);padding:12px 22px;display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(16,22,64,.06)}
 .fin-logo{font-family:'Kanit';font-weight:700;font-size:22px;color:var(--fin-red);line-height:1}
 .fin-logo small{display:block;font-size:9px;color:var(--navy);font-weight:600;letter-spacing:1.2px}
 .topbar .ttl{font-family:'Kanit';font-weight:600;color:var(--navy);font-size:15px}
@@ -45,10 +48,10 @@ input,select{font-family:inherit;font-size:15px}
 .btn:disabled{background:#C9CBD6;color:#fff;cursor:not-allowed}
 
 .wrap{max-width:1120px;margin:0 auto;padding:20px 18px 70px}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px;margin-bottom:16px}
-.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.sec-head::before{content:'';width:4px;height:20px;background:var(--fin-red);border-radius:2px}
-.sec-head h3{font-size:16.5px;color:var(--navy);font-weight:600}
+.card{background:var(--card);border:1px solid #EAEDF4;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;margin-bottom:16px}
+.sec-head{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sec-head::before{content:'';width:4px;height:20px;background:linear-gradient(var(--fin-red),var(--fin-red-dark));border-radius:2px}
+.sec-head h3{font-size:17px;color:var(--navy);font-weight:600;letter-spacing:-.2px}
 .sec-head .cnt{font-size:12.5px;color:var(--grey);font-weight:500}
 
 /* ===== Login ===== */
@@ -64,8 +67,11 @@ input,select{font-family:inherit;font-size:15px}
 
 /* ===== Stat tiles ===== */
 .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px}
-.tile{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px;display:flex;gap:14px;align-items:center}
-.tile .ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:21px;flex-shrink:0}
+.tile{background:var(--card);border:1px solid #EAEDF4;border-radius:var(--radius);box-shadow:var(--shadow);padding:16px 18px 16px 20px;display:flex;gap:14px;align-items:center;position:relative;overflow:hidden;transition:transform .18s,box-shadow .18s}
+.tile::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--navy)}
+.tile.hot::before{background:var(--fin-red)}
+.tile:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.tile .ic{width:46px;height:46px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
 .tile .ic.i-navy{background:var(--navy-soft)}
 .tile .ic.i-warn{background:var(--warn-soft)}
 .tile .ic.i-red{background:var(--fin-red-soft)}
@@ -74,6 +80,35 @@ input,select{font-family:inherit;font-size:15px}
 .tile .v{font-family:'Kanit';font-weight:700;font-size:26px;color:var(--navy);line-height:1.2}
 .tile .v small{font-size:12.5px;color:var(--grey);font-weight:500;font-family:'Anuphan'}
 .tile.hot .v{color:var(--fin-red)}
+
+/* ===== แดชบอร์ดภาพรวม (overview) ===== */
+.dash-head{display:flex;align-items:center;gap:12px;margin:2px 0 18px}
+.dash-head h1{font-family:'Kanit';font-weight:700;font-size:24px;color:var(--navy);letter-spacing:-.3px}
+.dash-head .sp{flex:1}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+@media(max-width:900px){.kpis{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.kpis{grid-template-columns:1fr}}
+.kpi{background:var(--card);border:1px solid #EAEDF4;border-radius:14px;padding:16px 18px;box-shadow:var(--shadow);transition:transform .18s,box-shadow .18s}
+.kpi:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg)}
+.kpi .k{font-size:13px;color:var(--grey);font-weight:600;margin-bottom:7px}
+.kpi .v{font-family:'Kanit';font-weight:700;font-size:25px;color:var(--navy);line-height:1.12}
+.kpi .v small{font-size:14px;font-weight:600;color:var(--grey)}
+.kpi .s{font-size:12px;color:var(--grey);margin-top:6px}
+.kpi.hot{background:linear-gradient(180deg,#FEF1F2,#FFFFFF);border-color:#F6D4D7}
+.kpi.hot .v{color:var(--fin-red)}
+.kpi.green .v{color:var(--ok)}
+.ov-grid{display:grid;grid-template-columns:1fr 380px;gap:16px;margin-bottom:16px;align-items:start}
+@media(max-width:960px){.ov-grid{grid-template-columns:1fr}}
+.ov-left{display:flex;flex-direction:column;gap:16px}
+.ov-left>.card{margin-bottom:0}
+.ov-map{margin-bottom:0}
+.ov-map-sub{font-size:12.5px;color:var(--grey);margin:-6px 0 0 14px}
+.ov-map-sub b{font-family:'Kanit';color:var(--navy)}
+.map-legend{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--grey);margin:10px 0 2px 14px}
+.map-legend i{width:16px;height:12px;border-radius:3px;display:inline-block}
+.map-legend .g0{background:#C9EBD8}.map-legend .g1{background:#5DBE88}.map-legend .g2{background:#126E3A}
+.ov-map #thMap{max-width:300px}
+.col-bar.hi{background:var(--fin-red)}
 
 /* ===== Charts ===== */
 .charts{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
@@ -150,16 +185,35 @@ input,select{font-family:inherit;font-size:15px}
 .props3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
 @media(max-width:860px){.props3{grid-template-columns:1fr;gap:14px}}
 
-/* ===== แผนที่ประเทศไทย ===== */
-.map-wrap{display:grid;grid-template-columns:330px 1fr;gap:20px;align-items:start}
-@media(max-width:700px){.map-wrap{grid-template-columns:1fr}}
-#thMap{width:100%;max-width:330px;display:block;margin:0 auto;background:linear-gradient(180deg,#F7FAFF,#EFF3FA);border-radius:14px}
-#thMap circle{transition:.2s}
-#thMap circle.on:hover{opacity:.8}
-.mp-list{max-height:420px;overflow-y:auto;border:1px solid var(--line);border-radius:10px}
-.mp-item{display:flex;justify-content:space-between;align-items:center;font-size:13px;padding:7px 12px;border-bottom:1px solid var(--line)}
+/* ===== แผนที่ประเทศไทย (choropleth) ===== */
+.map-wrap{display:grid;grid-template-columns:320px 1fr;gap:26px;align-items:start}
+@media(max-width:760px){.map-wrap{grid-template-columns:1fr}}
+.map-stage{position:relative;background:radial-gradient(130% 80% at 50% 0,#FBFCFF,#EBF0F8);border:1px solid var(--line);border-radius:16px;padding:12px}
+#thMap{width:100%;max-width:320px;height:auto;display:block;margin:0 auto;overflow:visible}
+#thMap .prov{stroke:#fff;stroke-width:.5;transition:fill .2s,stroke .12s;cursor:default}
+#thMap .prov.has{cursor:pointer}
+#thMap .prov.hl{stroke:var(--navy);stroke-width:1.3}
+.map-tip{position:absolute;left:0;top:0;pointer-events:none;background:var(--navy);color:#fff;font-family:'Kanit';font-size:12.5px;font-weight:500;padding:5px 11px;border-radius:9px;transform:translate(-50%,calc(-100% - 10px));white-space:nowrap;opacity:0;transition:opacity .12s;z-index:3;box-shadow:0 8px 20px rgba(27,20,100,.32)}
+.map-tip.show{opacity:1}
+.map-tip b{font-weight:700}
+.map-side .cov{background:linear-gradient(135deg,var(--navy),#312A8A);color:#fff;border-radius:14px;padding:15px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+.map-side .cov .n{font-family:'Kanit';font-weight:700;font-size:30px;line-height:1}
+.map-side .cov .n small{font-size:14px;font-weight:500;opacity:.75}
+.map-side .cov .l{font-size:12.5px;opacity:.85;margin-top:3px}
+.scale{margin-bottom:18px}
+.scale .bar{height:11px;border-radius:6px;background:linear-gradient(90deg,#C9EBD8,#126E3A)}
+.scale .ends{display:flex;justify-content:space-between;font-size:11px;color:var(--grey);margin-top:5px}
+.rank-t{font-size:13px;font-weight:700;color:var(--navy);font-family:'Kanit';margin-bottom:10px}
+.mp-list{max-height:420px;overflow-y:auto;padding-right:4px}
+.mp-item{padding:7px 2px;border-bottom:1px solid var(--line)}
 .mp-item:last-child{border-bottom:none}
-.mp-item b{font-family:'Kanit';color:var(--ok)}
+.mp-item .top{display:flex;align-items:center;gap:9px;font-size:13px}
+.mp-item .rk{width:20px;text-align:center;color:var(--grey);font-family:'Kanit';font-weight:600;flex-shrink:0}
+.mp-item .nm{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600;color:var(--ink)}
+.mp-item .ct{font-family:'Kanit';font-weight:700;color:var(--ok);white-space:nowrap}
+.mp-item .track{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin:5px 0 0 29px}
+.mp-item .track i{display:block;height:100%;background:linear-gradient(90deg,#4FC98A,var(--ok));border-radius:3px;transition:width .6s cubic-bezier(.22,.8,.36,1)}
+.mp-empty{color:var(--grey);font-size:12.5px;padding:16px;text-align:center}
 
 /* ===== Filters & table ===== */
 .filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}
@@ -241,22 +295,43 @@ tbody tr:hover{background:var(--navy-soft)}
 <!-- ===== DASHBOARD ===== -->
 <div class="wrap" id="dashboard">
 
-  <div class="tiles">
-    <div class="tile"><div class="ic i-navy">📥</div><div><div class="k">ใบสมัครวันนี้</div><div class="v" id="stToday">–</div></div></div>
-    <div class="tile hot"><div class="ic i-warn">⏳</div><div><div class="k">รอเจ้าหน้าที่ตรวจ</div><div class="v" id="stPending">–</div></div></div>
-    <div class="tile"><div class="ic i-ok">✅</div><div><div class="k">อนุมัติแล้ว</div><div class="v" id="stApproved">–</div></div></div>
-    <div class="tile"><div class="ic i-red">💰</div><div><div class="k">เบี้ยรวม (ไม่นับยกเลิก/ปฏิเสธ)</div><div class="v" id="stPremium">–</div></div></div>
+  <div class="dash-head">
+    <h1>📊 แดชบอร์ดภาพรวม</h1>
+    <div class="sp"></div>
+    <button class="btn btn-navy" onclick="scrollToTable()">ดูใบสมัครทั้งหมด →</button>
   </div>
 
-  <div class="card">
-    <div class="sec-head"><h3>ยอดขาย</h3>
-      <div class="sales-tabs">
-        <button class="stab on" id="st-day" onclick="setSalesTab('day')">📆 รายวัน</button>
-        <button class="stab" id="st-mon" onclick="setSalesTab('mon')">🗓️ รายเดือน</button>
-        <button class="stab" id="st-all" onclick="setSalesTab('all')">Σ ทั้งหมด</button>
+  <div class="kpis">
+    <div class="kpi hot"><div class="k">ยอดขายรวมทั้งหมด</div><div class="v" id="kTotal">–</div><div class="s" id="kTotalS"></div></div>
+    <div class="kpi"><div class="k">ยอดขายปีนี้</div><div class="v" id="kYear">–</div><div class="s" id="kYearS"></div></div>
+    <div class="kpi"><div class="k">ยอดขายเดือนนี้</div><div class="v" id="kMonth">–</div><div class="s" id="kMonthS"></div></div>
+    <div class="kpi"><div class="k">ยอดขายวันนี้</div><div class="v" id="kToday">–</div><div class="s" id="kTodayS"></div></div>
+    <div class="kpi"><div class="k">งวดผ่อนค้างชำระ</div><div class="v" id="kOut">–</div><div class="s" id="kOutS"></div></div>
+    <div class="kpi"><div class="k">เกินกำหนดชำระ</div><div class="v" id="kOvd">–</div><div class="s" id="kOvdS"></div></div>
+    <div class="kpi green"><div class="k">สมัครผ่าน LINE</div><div class="v" id="kLine">–</div><div class="s" id="kLineS"></div></div>
+    <div class="kpi"><div class="k">จังหวัดที่ทำแล้ว</div><div class="v" id="kProv">–</div><div class="s" id="kProvS"></div></div>
+  </div>
+
+  <div class="ov-grid">
+    <div class="ov-left">
+      <div class="card">
+        <div class="sec-head"><h3>📈 ยอดขายรายวัน (14 วันล่าสุด)</h3></div>
+        <div id="dailyChart"></div>
+      </div>
+      <div class="card">
+        <div class="sec-head"><h3>🗓️ ยอดขายรายเดือน · ปี <span id="curBE"></span></h3></div>
+        <div id="monthlyChart"></div>
       </div>
     </div>
-    <div id="salesBody"></div>
+    <div class="card ov-map">
+      <div class="sec-head" style="margin-bottom:4px"><h3>🗺️ แผนที่ยอดขายรายจังหวัด</h3></div>
+      <div class="ov-map-sub" id="mapCnt"></div>
+      <div class="map-legend"><span>น้อย</span><i class="g0"></i><i class="g1"></i><i class="g2"></i><span>มาก</span></div>
+      <div class="map-stage" id="mapStage">
+        <svg id="thMap" role="img" aria-label="แผนที่ประเทศไทย 77 จังหวัด"></svg>
+        <div class="map-tip" id="mapTip"></div>
+      </div>
+    </div>
   </div>
 
   <div class="card">
@@ -287,20 +362,6 @@ tbody tr:hover{background:var(--navy-soft)}
   </div>
 
   <div class="card">
-    <div class="sec-head"><h3>แผนที่ลูกค้าทำประกันทั่วประเทศ</h3><span class="cnt" id="mapCnt"></span></div>
-    <div class="map-wrap">
-      <svg id="thMap" viewBox="0 0 330 560" role="img" aria-label="แผนที่ประเทศไทย 77 จังหวัด"></svg>
-      <div>
-        <div class="legend" style="margin:0 0 10px">
-          <span class="li"><span class="dot" style="background:var(--c-green);border-radius:99px"></span>มีลูกค้าทำประกัน</span>
-          <span class="li"><span class="dot" style="background:#D7DAE3;border-radius:99px"></span>ยังไม่มี</span>
-        </div>
-        <div class="mp-list" id="mapList"></div>
-      </div>
-    </div>
-  </div>
-
-  <div class="card">
     <div class="sec-head"><h3>งวดผ่อนครบกำหนดใน 7 วัน</h3></div>
     <div class="tbl-scroll"><table id="dueTbl" style="min-width:560px">
       <thead><tr><th>เลขอ้างอิง</th><th>งวดที่</th><th>ครบกำหนด</th><th>ยอด (บาท)</th><th>ผู้ปกครอง / เบอร์โทร</th><th>แจ้งเตือน</th></tr></thead>
@@ -309,7 +370,7 @@ tbody tr:hover{background:var(--navy-soft)}
     <div class="empty" id="dueEmpty" style="display:none">ไม่มีงวดครบกำหนดใน 7 วันนี้ 🎉</div>
   </div>
 
-  <div class="card">
+  <div class="card" id="allApps">
     <div class="sec-head"><h3>ใบสมัครทั้งหมด</h3><span class="cnt" id="tblCount"></span>
       <button class="btn btn-red" style="margin-left:auto;padding:8px 16px;font-size:13.5px" onclick="openAddForm()">➕ เพิ่มรายการ</button>
     </div>
@@ -426,16 +487,38 @@ async function loadData(){
     return;
   }
   APPS = data||[];
-  renderStats(); renderSales(); renderAgePlan(); renderProps(); renderMap(); renderDue(); renderTable();
+  renderStats(); renderDaily(); renderMonthly(); renderAgePlan(); renderProps(); renderMap(); renderDue(); renderTable();
 }
 
+const setHTML=(id,html)=>{const e=document.getElementById(id);if(e)e.innerHTML=html;};
+function scrollToTable(){ const el=document.getElementById('allApps'); if(el) el.scrollIntoView({behavior:'smooth',block:'start'}); }
 function renderStats(){
-  const today = new Date(); today.setHours(0,0,0,0);
-  const active = APPS.filter(a=>!['REJECTED','CANCELLED'].includes(a.status));
-  document.getElementById('stToday').textContent    = fmt(APPS.filter(a=>new Date(a.created_at)>=today).length);
-  document.getElementById('stPending').textContent  = fmt(APPS.filter(a=>a.status==='PENDING_ADVISOR_REVIEW').length);
-  document.getElementById('stApproved').textContent = fmt(APPS.filter(a=>a.status==='APPROVED').length);
-  document.getElementById('stPremium').innerHTML    = fmt(active.reduce((s,a)=>s+(a.annual_premium||0),0))+' <small>บาท</small>';
+  const today=new Date(); today.setHours(0,0,0,0);
+  const now=new Date(), y=now.getFullYear(), m=now.getMonth(), be=y+543;
+  const inYear =APPS.filter(a=>new Date(a.created_at).getFullYear()===y);
+  const inMon  =APPS.filter(a=>{const d=new Date(a.created_at);return d.getFullYear()===y&&d.getMonth()===m;});
+  const inToday=APPS.filter(a=>new Date(a.created_at)>=today);
+  const activeCnt=APPS.filter(activeApp).length;
+  // งวดผ่อน: ค้างชำระ (ยังไม่จ่าย) และเกินกำหนด
+  let outAmt=0,outCnt=0,ovdAmt=0,ovdCnt=0;
+  APPS.forEach(a=>{ if(!activeApp(a))return;
+    (a.payment_installments||[]).forEach(i=>{
+      if(i.status==='PENDING'||i.status==='OVERDUE'){ outAmt+=i.amount||0; outCnt++;
+        if(new Date(i.due_date)<today){ ovdAmt+=i.amount||0; ovdCnt++; } }
+    }); });
+  const lineCnt=APPS.filter(a=>a.line_user_id).length;
+  const linePct=APPS.length?Math.round(lineCnt/APPS.length*100):0;
+  const pc={}; APPS.forEach(a=>{const p=(one(a.addresses)||{}).province; if(p)pc[p]=(pc[p]||0)+1;});
+  const provN=Object.keys(pc).length, top=Object.entries(pc).sort((a,b)=>b[1]-a[1])[0];
+  const be2=document.getElementById('curBE'); if(be2) be2.textContent=be;
+  setHTML('kTotal','฿'+fmt(sumAmt(APPS)));          setHTML('kTotalS',fmt(activeCnt)+' ใบสมัคร');
+  setHTML('kYear','฿'+fmt(sumAmt(inYear)));         setHTML('kYearS',fmt(inYear.length)+' ใบ · ปี '+be);
+  setHTML('kMonth','฿'+fmt(sumAmt(inMon)));         setHTML('kMonthS',fmt(inMon.length)+' ใบ');
+  setHTML('kToday','฿'+fmt(sumAmt(inToday)));       setHTML('kTodayS',fmt(inToday.length)+' ใบ');
+  setHTML('kOut','฿'+fmt(outAmt));                  setHTML('kOutS',fmt(outCnt)+' งวด');
+  setHTML('kOvd',fmt(ovdCnt)+' <small>งวด</small>');setHTML('kOvdS','฿'+fmt(ovdAmt));
+  setHTML('kLine',fmt(lineCnt)+' <small>ใบ</small>');setHTML('kLineS',linePct+'% ของทั้งหมด');
+  setHTML('kProv',provN+' <small>/ 77</small>');    setHTML('kProvS',top?('สูงสุด: '+top[0]):'ยังไม่มีข้อมูล');
 }
 
 const AGE_META={
@@ -603,47 +686,71 @@ function renderSales(){
   }
 }
 
-/* ===== แผนที่ประเทศไทย 77 จังหวัด (จุดตามพิกัดโดยประมาณ) ===== */
-const TH_PATH='M198.2,312.0L167.9,295.9L139.1,296.6L144.1,269.0L114.4,269.2L111.7,307.8L93.5,359.0L82.6,390.0L84.9,415.4L106.8,416.5L120.5,448.5L126.6,478.8L145.4,498.9L165.8,503.0L183.2,521.2L172.2,535.6L150.0,539.8L147.3,521.8L119.8,506.4L114.0,512.7L100.7,499.2L94.9,481.9L77.0,462.1L60.7,445.4L55.1,466.0L48.8,446.6L52.4,424.7L62.3,391.1L78.7,355.0L97.2,322.3L84.0,290.4L84.5,274.1L80.7,254.5L58.2,226.6L50.2,209.0L61.8,202.6L74.1,172.1L60.3,148.9L38.9,123.3L22.7,92.6L36.9,86.2L52.2,48.3L76.0,46.7L95.7,31.5L115.0,23.4L129.6,34.2L131.5,55.3L154.3,56.9L146.0,93.8L146.8,125.3L182.3,104.4L192.4,110.5L212.1,109.5L218.9,97.3L244.4,99.7L270.0,128.2L272.1,162.8L299.4,193.4L297.9,223.1L286.9,238.9L255.4,233.8L211.8,240.5L190.2,269.7L198.2,312.0Z';
-const PROVINCES=[
-  ['เชียงราย',19.91,99.83],['เชียงใหม่',18.79,98.98],['แม่ฮ่องสอน',19.30,97.97],['ลำพูน',18.58,99.01],
-  ['ลำปาง',18.29,99.49],['พะเยา',19.17,99.90],['แพร่',18.14,100.14],['น่าน',18.78,100.77],
-  ['อุตรดิตถ์',17.62,100.10],['ตาก',16.88,99.13],['สุโขทัย',17.01,99.82],['พิษณุโลก',16.82,100.27],
-  ['กำแพงเพชร',16.48,99.52],['พิจิตร',16.44,100.35],['เพชรบูรณ์',16.42,101.16],['นครสวรรค์',15.70,100.14],
-  ['อุทัยธานี',15.38,100.02],['เลย',17.49,101.72],['หนองคาย',17.88,102.74],['บึงกาฬ',18.36,103.65],
-  ['หนองบัวลำภู',17.20,102.44],['อุดรธานี',17.41,102.79],['สกลนคร',17.15,104.15],['นครพนม',17.39,104.77],
-  ['มุกดาหาร',16.54,104.72],['ขอนแก่น',16.44,102.84],['กาฬสินธุ์',16.43,103.51],['มหาสารคาม',16.18,103.30],
-  ['ร้อยเอ็ด',16.05,103.65],['ยโสธร',15.79,104.14],['อำนาจเจริญ',15.86,104.63],['ชัยภูมิ',15.81,102.03],
-  ['นครราชสีมา',14.98,102.10],['บุรีรัมย์',14.99,103.10],['สุรินทร์',14.88,103.49],['ศรีสะเกษ',15.12,104.32],
-  ['อุบลราชธานี',15.24,104.85],['ชัยนาท',15.19,100.13],['สิงห์บุรี',14.89,100.40],['ลพบุรี',14.80,100.62],
-  ['อ่างทอง',14.59,100.46],['พระนครศรีอยุธยา',14.35,100.57],['สระบุรี',14.53,100.91],['สุพรรณบุรี',14.47,100.12],
-  ['นครปฐม',13.82,100.06],['นนทบุรี',13.86,100.51],['ปทุมธานี',14.02,100.53],['กรุงเทพมหานคร',13.76,100.50],
-  ['สมุทรปราการ',13.60,100.60],['สมุทรสาคร',13.55,100.27],['สมุทรสงคราม',13.41,100.00],['นครนายก',14.20,101.21],
-  ['ปราจีนบุรี',14.05,101.37],['สระแก้ว',13.82,102.07],['ฉะเชิงเทรา',13.69,101.07],['ชลบุรี',13.36,100.98],
-  ['ระยอง',12.68,101.28],['จันทบุรี',12.61,102.10],['ตราด',12.24,102.51],['กาญจนบุรี',14.02,99.53],
-  ['ราชบุรี',13.53,99.81],['เพชรบุรี',13.11,99.94],['ประจวบคีรีขันธ์',11.81,99.80],['ชุมพร',10.49,99.18],
-  ['ระนอง',9.96,98.64],['สุราษฎร์ธานี',9.14,99.33],['พังงา',8.45,98.53],['ภูเก็ต',7.88,98.39],
-  ['กระบี่',8.06,98.92],['นครศรีธรรมราช',8.43,99.96],['ตรัง',7.56,99.61],['พัทลุง',7.62,100.07],
-  ['สงขลา',7.19,100.60],['สตูล',6.62,100.07],['ปัตตานี',6.87,101.25],['ยะลา',6.54,101.28],['นราธิวาส',6.43,101.82],
-];
+/* ===== กราฟยอดขายรายวัน (14 วันล่าสุด) ===== */
+function renderDaily(){
+  const days=[];
+  for(let i=13;i>=0;i--){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-i); days.push({d,apps:[]}); }
+  const idx={}; days.forEach((x,i)=>idx[dKeyOf(x.d)]=i);
+  APPS.forEach(a=>{ const k=dKeyOf(a.created_at); if(idx[k]!==undefined) days[idx[k]].apps.push(a); });
+  days.forEach(x=>x.amt=sumAmt(x.apps));
+  const max=Math.max(1,...days.map(x=>x.amt));
+  document.getElementById('dailyChart').innerHTML=`<div class="cols">${days.map((x,i)=>`
+    <div class="col" title="${x.d.toLocaleDateString('th-TH',{day:'numeric',month:'short'})} · ${fmt(x.amt)} บาท">
+      <div class="col-amt">${kFmt(x.amt)}</div>
+      <div class="col-bar${i===days.length-1&&x.amt?' hi':''}" style="height:${Math.max(2,x.amt/max*100)}%"></div>
+      <div class="col-d">${pad2(x.d.getDate())}/${pad2(x.d.getMonth()+1)}</div>
+    </div>`).join('')}</div>`;
+}
+/* ===== กราฟยอดขายรายเดือน (ปีปัจจุบัน) ===== */
+function renderMonthly(){
+  const y=new Date().getFullYear();
+  const mon=Array.from({length:12},()=>[]);
+  APPS.forEach(a=>{ const d=new Date(a.created_at); if(d.getFullYear()===y) mon[d.getMonth()].push(a); });
+  const amts=mon.map(sumAmt);
+  const max=Math.max(1,...amts);
+  document.getElementById('monthlyChart').innerHTML=`<div class="cols">${amts.map((amt,i)=>`
+    <div class="col" title="${THM[i]} ${(y+543)%100} · ${fmt(amt)} บาท">
+      <div class="col-amt">${kFmt(amt)}</div>
+      <div class="col-bar" style="height:${Math.max(2,amt/max*100)}%"></div>
+      <div class="col-d">${THM[i]}</div>
+    </div>`).join('')}</div>`;
+}
+
+/* ===== แผนที่ประเทศไทย 77 จังหวัด (choropleth ระบายสีรายจังหวัดจริง) ===== */
+function mapColor(t){                 // t∈[0,1] อ่อน→เข้ม (เขียว)
+  const A=[0xC9,0xEB,0xD8], B=[0x12,0x6E,0x3A];
+  const c=A.map((a,i)=>Math.round(a+(B[i]-a)*t));
+  return `rgb(${c[0]},${c[1]},${c[2]})`;
+}
 function renderMap(){
   const cnt={};
   APPS.forEach(a=>{ const pv=(one(a.addresses)||{}).province; if(pv) cnt[pv]=(cnt[pv]||0)+1; });
-  const X=lo=>((lo-97.0)/9.2*310+10), Y=la=>((20.8-la)/15.4*540+10);
-  document.getElementById('thMap').innerHTML=
-    `<path d="${TH_PATH}" fill="#E4EBF7" stroke="#B9C6DE" stroke-width="1.5" stroke-linejoin="round"/>`
-    +PROVINCES.map(([n,la,lo])=>{
-    const c=cnt[n]||0;
-    const r=c?Math.min(6+c,11):3.6;
-    return `<circle cx="${X(lo).toFixed(1)}" cy="${Y(la).toFixed(1)}" r="${r}" `
-      +(c?`class="on" fill="#1E9E5A" stroke="#fff" stroke-width="1.6"`:`fill="#D7DAE3"`)
-      +`><title>${n}${c?' · '+c+' ใบ':' · ยังไม่มีลูกค้า'}</title></circle>`;
+  const max=Math.max(1,...Object.values(cnt));
+  const G=window.GEO_TH, svg=document.getElementById('thMap');
+  if(!svg) return;
+  if(!G){ svg.innerHTML='<text x="10" y="20" fill="#999">โหลดแผนที่ไม่สำเร็จ</text>'; return; }
+  svg.setAttribute('viewBox',`0 0 ${G.W} ${G.H}`);
+  svg.innerHTML=G.provs.map(p=>{
+    const c=cnt[p.p]||0;
+    const fill=c?mapColor(0.28+0.72*(c/max)):'#E7EBF3';
+    return `<path class="prov${c?' has':''}" d="${p.d}" data-p="${p.p}" data-c="${c}" fill="${fill}"/>`;
   }).join('');
-  const act=Object.entries(cnt).filter(([n])=>PROVINCES.some(p=>p[0]===n)).sort((a,b)=>b[1]-a[1]);
-  document.getElementById('mapCnt').textContent='ครอบคลุม '+act.length+' จาก 77 จังหวัด';
-  document.getElementById('mapList').innerHTML=act.length
-    ?act.map(([n,c])=>`<div class="mp-item"><span>🟢 ${n}</span><b>${c} ใบ</b></div>`).join('')
-    :'<div class="ap-none" style="padding:14px">ยังไม่มีจังหวัดที่มีลูกค้าทำประกัน — จุดจะเปลี่ยนเป็นสีเขียวเมื่อมีใบสมัครเข้ามา</div>';
+  // ทูลทิปตามเมาส์ + ไฮไลต์จังหวัด
+  const tip=document.getElementById('mapTip'), stage=document.getElementById('mapStage');
+  svg.querySelectorAll('.prov').forEach(el=>{
+    el.addEventListener('mousemove',ev=>{
+      const r=stage.getBoundingClientRect();
+      tip.style.left=(ev.clientX-r.left)+'px'; tip.style.top=(ev.clientY-r.top)+'px';
+      const c=el.dataset.c;
+      tip.innerHTML=`${el.dataset.p} · <b>${c==='0'?'ยังไม่มีลูกค้า':fmt(c)+' ราย'}</b>`;
+      tip.classList.add('show');
+      const cur=svg.querySelector('.prov.hl'); if(cur&&cur!==el) cur.classList.remove('hl');
+      el.classList.add('hl');
+    });
+    el.addEventListener('mouseleave',()=>{ tip.classList.remove('show'); el.classList.remove('hl'); });
+  });
+  const provN=Object.keys(cnt).length;
+  const el=document.getElementById('mapCnt'); if(el) el.innerHTML='ทำแล้ว <b>'+provN+' / 77</b> จังหวัด';
 }
 
 function renderDue(){
