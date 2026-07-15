@@ -24,6 +24,7 @@ export const ORG_LD = {
     { '@type': 'EducationalOccupationalCredential', credentialCategory: 'license', name: 'ใบอนุญาตนายหน้าประกันชีวิต เลขที่ ช00008/2564 (คปภ.)' },
     { '@type': 'EducationalOccupationalCredential', credentialCategory: 'license', name: 'ใบอนุญาตเสนอขายอิเล็กทรอนิกส์ เลขที่ อลว021021000/2564 (คปภ.)' },
   ],
+  sameAs: ['https://www.facebook.com/finforkid', 'https://www.tiktok.com/@finforkid'],
   contactPoint: [{ '@type': 'ContactPoint', contactType: 'customer service', url: SITE + '/contact/', availableLanguage: 'th' }],
 };
 export const WEBSITE_LD = {
@@ -165,6 +166,7 @@ ${content}
           <li><a href="/go/line/?intent=footer" data-line-intent="footer">LINE: @finforkids</a></li>
           <li><a href="https://www.facebook.com/finforkid" rel="noopener" target="_blank">Facebook: ฟินประกันเด็ก</a></li>
           <li><a href="https://m.me/finforkid" rel="noopener" target="_blank">Messenger: Fin For Kids</a></li>
+          <li><a href="https://www.tiktok.com/@finforkid" rel="noopener" target="_blank">TikTok: @finforkid</a></li>
           <li><a href="/complaints/">ช่องทางร้องเรียน</a></li>
         </ul>
       </div>
