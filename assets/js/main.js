@@ -14,7 +14,7 @@
      GA4_ID เช่น 'G-XXXXXXXXXX' (สร้างที่ analytics.google.com)
      GTM_ID เช่น 'GTM-XXXXXXX' (ถ้าใช้ GTM ให้เว้น GA4_ID ว่างไว้ แล้วตั้ง GA4 ใน GTM แทน)
      โหลดแบบเคารพ Consent Mode v2: เริ่มต้น denied ทั้งหมด แล้วอัปเดตตามที่ผู้ใช้กดใน cookie banner */
-  var GA4_ID = '';
+  var GA4_ID = 'G-Q4VKS1QV33';
   var GTM_ID = '';
 
   window.dataLayer = window.dataLayer || [];
