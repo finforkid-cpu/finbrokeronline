@@ -231,28 +231,55 @@ ${pageHero({
 {
   file: 'license/index.html',
   path: '/license/',
-  title: 'ข้อมูลใบอนุญาตนายหน้าประกันภัย | FIN Insurance Broker',
-  desc: 'ข้อมูลใบอนุญาตนายหน้าประกันวินาศภัยของ FIN Insurance Broker และช่องทางตรวจสอบสถานะใบอนุญาตกับสำนักงาน คปภ.',
+  title: 'ใบอนุญาตนายหน้าประกันภัย บริษัท ฟิน อินชัวรันส์ โบรคเกอร์ จำกัด | FIN Broker Online',
+  desc: 'ข้อมูลนิติบุคคลและใบอนุญาตของ บริษัท ฟิน อินชัวรันส์ โบรคเกอร์ จำกัด — นายหน้าประกันวินาศภัย ว00021/2562, นายหน้าประกันชีวิต ช00008/2564, เสนอขายอิเล็กทรอนิกส์ อลว021021000/2564 ภายใต้การกำกับของ คปภ.',
   page: 'license', active: 'about',
   content: `
 ${breadcrumb([BC_HOME, ['เกี่ยวกับเรา', '/about/'], ['ข้อมูลใบอนุญาต']])}
 ${pageHero({ h1: 'ข้อมูลใบอนุญาตนายหน้าประกันภัย', sub: 'โปร่งใส ตรวจสอบได้ — มาตรฐานแรกของการเป็นนายหน้าที่ดี' })}
 
-<section class="section"><div class="container prose" style="max-width:760px">
+<section class="section"><div class="container prose" style="max-width:820px">
 <h2>ข้อมูลนิติบุคคล</h2>
 <div class="tbl-wrap"><table class="tbl">
 <tbody>
-<tr><td>ชื่อผู้ประกอบการ</td><td style="text-align:left">FIN Insurance Broker (ระบุชื่อนิติบุคคลเต็ม)</td></tr>
-<tr><td>ประเภทใบอนุญาต</td><td style="text-align:left">นายหน้าประกันวินาศภัย</td></tr>
-<tr><td>เลขที่ใบอนุญาต</td><td style="text-align:left">(ระบุเลขที่ใบอนุญาต)</td></tr>
-<tr><td>ผลิตภัณฑ์หลัก</td><td style="text-align:left">ประกันสุขภาพเด็ก FIN FOR KIDS PLUS (รับประกันภัยโดย MSIG)</td></tr>
+<tr><td>ชื่อนิติบุคคล</td><td style="text-align:left">บริษัท ฟิน อินชัวรันส์ โบรคเกอร์ จำกัด</td></tr>
+<tr><td>ประเภทธุรกิจ</td><td style="text-align:left">ที่ปรึกษาด้านประกันวินาศภัย</td></tr>
+<tr><td>ทะเบียนพาณิชย์เลขที่</td><td style="text-align:left">0105562119691 (ทุนจดทะเบียน 100 ล้านบาท)</td></tr>
+<tr><td>ใบอนุญาตนายหน้าประกันวินาศภัย</td><td style="text-align:left">เลขที่ ว00021/2562</td></tr>
+<tr><td>ใบอนุญาตนายหน้าประกันชีวิต</td><td style="text-align:left">เลขที่ ช00008/2564</td></tr>
+<tr><td>ใบอนุญาตเสนอขายอิเล็กทรอนิกส์</td><td style="text-align:left">เลขที่ อลว021021000/2564</td></tr>
+<tr><td>หน่วยงานกำกับดูแล</td><td style="text-align:left">สำนักงานคณะกรรมการกำกับและส่งเสริมการประกอบธุรกิจประกันภัย (คปภ.)</td></tr>
+<tr><td>ผลิตภัณฑ์หลัก</td><td style="text-align:left">ประกันสุขภาพเด็ก FIN FOR KIDS PLUS (รับประกันภัยโดย บริษัท เอ็ม เอส ไอ จี ประกันภัย (ประเทศไทย) จำกัด (มหาชน))</td></tr>
 </tbody></table></div>
-<p class="note" style="margin-top:16px">โปรดกรอกเลขที่ใบอนุญาตและชื่อนิติบุคคลจริงก่อนเผยแพร่เว็บไซต์</p>
+
+<h2>ภาพใบอนุญาตจาก คปภ.</h2>
+<p>กดที่ภาพเพื่อขยายดูขนาดเต็ม</p>
+<div class="cert-grid">
+  <figure>
+    <button class="cert-frame" type="button" data-lightbox="/assets/img/license-oic-nonlife.jpg" data-lightbox-alt="ใบอนุญาตเป็นนายหน้าประกันวินาศภัย ทะเบียนเลขที่ ว00021/2562 ออกโดย คปภ. ให้แก่ บริษัท ฟิน อินชัวรันส์ โบรคเกอร์ จำกัด" aria-label="ขยายภาพใบอนุญาตนายหน้าประกันวินาศภัย">
+      <img src="/assets/img/license-oic-nonlife.jpg" width="1205" height="819" loading="lazy" alt="ใบอนุญาตเป็นนายหน้าประกันวินาศภัย ทะเบียนเลขที่ ว00021/2562 จาก คปภ. — บริษัท ฟิน อินชัวรันส์ โบรคเกอร์ จำกัด">
+    </button>
+    <figcaption>ใบอนุญาตนายหน้าประกันวินาศภัย เลขที่ ว00021/2562</figcaption>
+  </figure>
+  <figure>
+    <button class="cert-frame" type="button" data-lightbox="/assets/img/license-oic-life.jpg" data-lightbox-alt="ใบอนุญาตเป็นนายหน้าประกันชีวิต ทะเบียนเลขที่ ช00008/2564 ออกโดย คปภ. ให้แก่ บริษัท ฟิน อินชัวรันส์ โบรคเกอร์ จำกัด" aria-label="ขยายภาพใบอนุญาตนายหน้าประกันชีวิต">
+      <img src="/assets/img/license-oic-life.jpg" width="1007" height="638" loading="lazy" alt="ใบอนุญาตเป็นนายหน้าประกันชีวิต ทะเบียนเลขที่ ช00008/2564 จาก คปภ. — บริษัท ฟิน อินชัวรันส์ โบรคเกอร์ จำกัด">
+    </button>
+    <figcaption>ใบอนุญาตนายหน้าประกันชีวิต เลขที่ ช00008/2564</figcaption>
+  </figure>
+</div>
 
 <h2>ตรวจสอบใบอนุญาตด้วยตนเอง</h2>
 <p>ผู้บริโภคสามารถตรวจสอบสถานะใบอนุญาตนายหน้าประกันภัยได้โดยตรงกับสำนักงานคณะกรรมการกำกับและส่งเสริมการประกอบธุรกิจประกันภัย (คปภ.)</p>
 <p><a class="btn btn-outline-red" href="https://smart.oic.or.th/EService/Menu5" target="_blank" rel="noopener">ตรวจสอบใบอนุญาตนายหน้ากับ คปภ. →</a></p>
+
+<p class="note" style="margin-top:20px">ข้อมูลความคุ้มครอง เบี้ยประกัน และการพิจารณารับประกันภัย เป็นไปตามเงื่อนไขกรมธรรม์และบริษัทรับประกันภัยกำหนด</p>
 </div></section>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="ภาพขยาย">
+  <button class="lightbox-close" aria-label="ปิดภาพขยาย">✕</button>
+  <img src="" alt="">
+</div>
 `,
 },
 

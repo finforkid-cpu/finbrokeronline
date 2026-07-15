@@ -282,6 +282,16 @@ table.tbl{width:100%;border-collapse:collapse;background:#fff;min-width:560px}
 .footer-brand .slogan{font-family:var(--font-head);color:#fff;margin:8px 0 14px}
 .footer-brand .slogan em{color:#FF7A7E;font-style:normal}
 .footer-brand p{font-size:.85rem;line-height:1.8}
+.footer-company{border-top:1px solid rgba(255,255,255,.12);padding:30px 0;display:grid;grid-template-columns:1.4fr 1fr;gap:28px;align-items:center}
+.footer-company .fc-info b{color:#fff;font-family:var(--font-head);font-size:1.02rem}
+.footer-company .fc-info p{font-size:.84rem;line-height:1.8;margin:8px 0 12px}
+.fc-licenses{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:.86rem;color:#DEDDF2}
+.fc-certs{display:flex;gap:16px;justify-content:flex-end}
+.fc-certs a{display:flex;flex-direction:column;gap:8px;text-decoration:none;color:#C9C8E4;font-size:.78rem;text-align:center;max-width:200px;transition:transform .2s ease}
+.fc-certs a:hover{transform:translateY(-3px);color:#fff}
+.fc-certs img{width:100%;height:auto;border-radius:10px;border:3px solid rgba(255,255,255,.85);box-shadow:0 8px 24px rgba(0,0,0,.3);background:#fff}
+.footer-copy{font-size:.8rem;color:#8D8CB8;text-align:center;padding:0 0 26px;margin:0 auto}
+@media(max-width:760px){.footer-company{grid-template-columns:1fr}.fc-certs{justify-content:flex-start}}
 .footer-legal{border-top:1px solid rgba(255,255,255,.12);padding:20px 0;display:flex;flex-wrap:wrap;gap:10px 22px;justify-content:center;font-size:.85rem}
 .footer-legal a{color:#C9C8E4;text-decoration:none}
 .footer-legal a:hover{color:#fff}
@@ -394,6 +404,15 @@ table.tbl{width:100%;border-collapse:collapse;background:#fff;min-width:560px}
 .toc a:hover{color:var(--red)}
 .article-body h2{display:flex;gap:12px;align-items:baseline}
 .article-body h2 .no{flex:none;background:var(--red);color:#fff;font-size:.95rem;width:32px;height:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(-3px)}
+/* ---------- ภาพใบอนุญาต (หน้า /license/) ---------- */
+.cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:18px 0 30px}
+@media(max-width:680px){.cert-grid{grid-template-columns:1fr}}
+.cert-grid figure{margin:0}
+.cert-frame{display:block;width:100%;border:0;background:none;padding:0;cursor:zoom-in}
+.cert-frame img{width:100%;height:auto;display:block;border-radius:12px;border:1px solid var(--border);box-shadow:0 10px 30px rgba(29,27,103,.10);transition:transform .2s ease}
+.cert-frame:hover img{transform:scale(1.02)}
+.cert-grid figcaption{font-size:.85rem;color:var(--gray);text-align:center;margin-top:10px}
+
 /* ---------- เคสเคลมจริง ---------- */
 .claim-card{overflow:hidden}
 .claim-thumb{position:relative;display:block;width:100%;border:0;background:none;padding:0;cursor:zoom-in}
