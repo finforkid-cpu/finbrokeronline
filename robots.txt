@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /go/
 
-Sitemap: https://www.finbrokeronline.com/sitemap.xml
+Sitemap: https://finbrokeronline.com/sitemap.xml

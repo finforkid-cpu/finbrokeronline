@@ -1,6 +1,7 @@
 // Layout กลางของทุกหน้า — แก้ header/footer ที่นี่ที่เดียว แล้วรัน node build.mjs
 // หมายเหตุ: หน้าแรก (index.html) เขียนแยกไว้ต่างหาก ไม่ได้ generate จากไฟล์นี้
-export const SITE = 'https://www.finbrokeronline.com';
+// โดเมนหลัก (canonical) — ต้องตรงกับ primary domain ใน Vercel (www → redirect มาที่นี่)
+export const SITE = 'https://finbrokeronline.com';
 
 // ===== เครื่องมือ SEO / Analytics =====
 // ใส่ค่าแล้วรัน node build.mjs — ถ้าเว้นว่างจะไม่ render อะไรลงหน้าเว็บ

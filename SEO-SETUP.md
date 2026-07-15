@@ -7,19 +7,23 @@
 
 ## 1) Google Search Console (สำคัญที่สุด — ทำก่อน)
 
-1. ไปที่ https://search.google.com/search-console → Add property แบบ **URL prefix**: `https://www.finbrokeronline.com/`
-2. เลือกวิธียืนยัน **HTML tag** จะได้แท็กแบบ `<meta name="google-site-verification" content="AbCdEf...">`
-3. เอาเฉพาะค่าใน `content` ไปใส่ 2 ที่:
-   - `site-src/layout.mjs` → `SEO_TOOLS.GSC_VERIFICATION = 'AbCdEf...'` แล้วรัน `node build.mjs`
-   - `index.html` (หน้าแรกเขียนมือ) → วางแท็กเต็มใต้คอมเมนต์ `<!-- Google Search Console: ... -->`
-4. Deploy แล้วกด Verify
-5. เมนู **Sitemaps** → ส่ง `https://www.finbrokeronline.com/sitemap.xml`
-6. เมนู **URL Inspection** → วาง URL หน้าแรก + หน้าสำคัญ → กด **Request Indexing** (เร่งให้ Google เก็บเร็วขึ้น)
+> โดเมนหลัก (canonical) ของเว็บคือ `https://finbrokeronline.com` (ไม่มี www — www จะ redirect มาที่นี่ตามการตั้งค่าใน Vercel)
+
+**วิธีที่แนะนำ: Domain property (ยืนยันผ่าน DNS ที่ Cloudflare — ครอบคลุมทั้ง www/ไม่มี www)**
+1. ไปที่ https://search.google.com/search-console → Add property → ช่องซ้าย **Domain** → พิมพ์ `finbrokeronline.com`
+2. Google จะให้ค่า TXT แบบ `google-site-verification=AbCdEf...` → กด Copy
+3. เปิด https://dash.cloudflare.com → เลือกโดเมน finbrokeronline.com → **DNS** → **Add record**:
+   - Type: `TXT` · Name: `@` · Content: วางค่าที่ copy มา → Save
+4. กลับมาที่ GSC กด **Verify** (ถ้ายังไม่ผ่านรอ 5–10 นาทีแล้วกดใหม่)
+5. เมนู **Sitemaps** → ส่ง `https://finbrokeronline.com/sitemap.xml`
+6. เมนู **URL Inspection** → วาง URL หน้าแรก + หน้าสำคัญ (เช่น /child-insurance/fin-for-kids-plus/) → กด **Request Indexing**
+
+*(วิธีสำรอง: URL prefix `https://finbrokeronline.com/` + HTML tag → เอาค่า content ใส่ `SEO_TOOLS.GSC_VERIFICATION` ใน site-src/layout.mjs แล้ว build + วางแท็กเต็มใน index.html ใต้คอมเมนต์ที่เตรียมไว้)*
 
 ## 2) Google Analytics 4
 
 1. ไปที่ https://analytics.google.com → สร้าง Property ใหม่ (ประเทศไทย, สกุลเงิน THB)
-2. สร้าง Web Data Stream ด้วยโดเมน `www.finbrokeronline.com` → ได้ **Measurement ID** รูปแบบ `G-XXXXXXXXXX`
+2. สร้าง Web Data Stream ด้วยโดเมน `finbrokeronline.com` → ได้ **Measurement ID** รูปแบบ `G-XXXXXXXXXX`
 3. เปิดไฟล์ `assets/js/main.js` บรรทัดบน ๆ → ใส่ `var GA4_ID = 'G-XXXXXXXXXX';` → เซฟ (ไม่ต้อง build ใหม่ ใช้ได้ทุกหน้าทันที)
 4. ระบบที่วางไว้ให้แล้ว:
    - **Consent Mode v2** — เริ่มต้น denied ทั้งหมด และอัปเดตตามที่ผู้ใช้เลือกใน cookie banner (ตรงตาม PDPA/GDPR)

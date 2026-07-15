@@ -1,4 +1,4 @@
-# FIN Broker Online — เว็บไซต์ www.finbrokeronline.com
+# FIN Broker Online — เว็บไซต์ finbrokeronline.com
 
 เว็บไซต์ประกันออนไลน์ static HTML เน้น SEO และปิดการขายผ่าน LINE OA (@finforkids)
 สร้างตามสเปค `FINBROKERONLINE_Website_SEO_Design.md` (ระยะที่ 1 + หน้าเนื้อหาหลัก)
