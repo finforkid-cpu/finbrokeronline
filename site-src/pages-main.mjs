@@ -1,8 +1,42 @@
 // หน้าเว็บหลัก: เคสเคลม · บทความ · เกี่ยวกับเรา · ติดต่อ · ใบอนุญาต · ร้องเรียน
 // หมายเหตุ: นำหน้าประกันรถยนต์ออกตามนโยบาย (2026-07-14) — เว็บไซต์แสดงเฉพาะประกันสุขภาพเด็ก
-import { breadcrumb, pageHero, ctaBanner, DISCLAIMER_PRODUCT } from './layout.mjs';
+import { breadcrumb, pageHero, ctaBanner, DISCLAIMER_PRODUCT, SITE } from './layout.mjs';
 
 const BC_HOME = ['หน้าแรก', '/'];
+
+/* ============ ข้อมูลเคสเคลมจริง (ภาพใน assets/img/claims/) ============ */
+// disease: rsv | flu | hfmd — ใช้กรองด้วยปุ่ม pill
+export const CLAIM_CASES = [
+  { img: 'case-6', disease: 'rsv',  title: 'ลูกป่วย RSV (หลอดลมอักเสบ)', days: 2, amount: '102,571.00', note: 'เคสค่ารักษาสูง — เคลมตามวงเงินแผน ตัวแทนประสานงานขอส่วนลดค่าห้อง/ค่ารักษาให้' },
+  { img: 'case-4', disease: 'rsv',  title: 'ลูกป่วย RSV', days: 8, amount: '72,142.20', note: 'นอนโรงพยาบาลยาว 8 วัน — เคลมค่าห้องและค่ารักษาตามเอกสารเคลม' },
+  { img: 'case-1', disease: 'rsv',  title: 'ลูกป่วย RSV', days: 3, amount: '53,166.00', note: 'ตัวแทนประสานงานขอส่วนลดค่าห้อง/ค่ารักษาเรียบร้อย' },
+  { img: 'case-3', disease: 'flu',  title: 'ลูกป่วยไข้หวัดใหญ่ สายพันธุ์ A', days: 5, amount: '33,385.30', note: 'เคลมค่าห้องและค่ารักษาพยาบาลทั่วไปตามวงเงินแผน' },
+  { img: 'case-9', disease: 'flu',  title: 'ลูกป่วยไข้หวัดใหญ่', days: 2, amount: '33,268.00', note: 'เคลมไว ไม่ยุ่งยาก — ค่ารักษาพยาบาลตามเอกสารเคลม' },
+  { img: 'case-5', disease: 'rsv',  title: 'ลูกป่วย RSV', days: 2, amount: '28,746.00', note: 'ตัวแทนประสานงานขอส่วนลดค่าห้อง/ค่ารักษาเรียบร้อย' },
+  { img: 'case-7', disease: 'flu',  title: 'ลูกป่วยไข้หวัดใหญ่ สายพันธุ์ A', days: 2, amount: '25,028.00', note: 'ตัวแทนประสานงานขอส่วนลด ไม่มีส่วนต่างค่าห้อง' },
+  { img: 'case-2', disease: 'flu',  title: 'ลูกป่วยไข้หวัดใหญ่ สายพันธุ์ A', days: 4, amount: '24,017.00', note: 'คุ้มครองเต็มจำนวนตามเอกสารเคลม ไม่มีส่วนต่าง' },
+  { img: 'case-8', disease: 'hfmd', title: 'ลูกป่วยมือ เท้า ปาก', days: 2, amount: '23,216.30', note: 'โรคฮิตวัยอนุบาล — เคลมค่าห้องและค่ารักษาตามวงเงินแผน' },
+];
+
+const DISEASE_LABEL = { rsv: 'RSV', flu: 'ไข้หวัดใหญ่', hfmd: 'มือ เท้า ปาก' };
+
+export function claimCard(c) {
+  return `<article class="card claim-card reveal" data-cat="${c.disease}">
+  <button class="claim-thumb" type="button" data-lightbox="/assets/img/claims/${c.img}.jpg" data-lightbox-alt="รีวิวเคสเคลมจริง: ${c.title} นอนโรงพยาบาล ${c.days} วัน ค่ารักษา ${c.amount} บาท" aria-label="ดูภาพเคส ${c.title} ขนาดเต็ม">
+    <img src="/assets/img/claims/${c.img}.jpg" width="1254" height="1254" loading="lazy" alt="รีวิวเคสเคลมจริง ${c.title} นอนโรงพยาบาล ${c.days} วัน ค่ารักษา ${c.amount} บาท พร้อมภาพเอกสารเคลมที่ปิดข้อมูลส่วนบุคคล">
+    <span class="zoom-hint"><svg fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><use href="#i-search"/></svg> กดเพื่อดูขนาดเต็ม</span>
+  </button>
+  <div class="post-body">
+    <div class="claim-chips">
+      <span class="claim-chip chip-disease">${DISEASE_LABEL[c.disease]}</span>
+      <span class="claim-chip">🛏 นอน รพ. ${c.days} วัน</span>
+      <span class="claim-chip chip-amount">฿ ${c.amount}</span>
+    </div>
+    <h3>${c.title}</h3>
+    <p>${c.note}</p>
+  </div>
+</article>`;
+}
 
 export const mainPages = [
 
@@ -10,35 +44,72 @@ export const mainPages = [
 {
   file: 'claims/index.html',
   path: '/claims/',
-  title: 'เคสเคลมจริงประกันสุขภาพเด็ก | FIN Broker Online',
-  desc: 'ตัวอย่างเคสเคลมประกันเด็ก FIN FOR KIDS PLUS ที่ได้รับการพิจารณาแล้ว พร้อมภาพเอกสารจริงที่ปิดข้อมูลส่วนบุคคล ลำดับการใช้สิทธิ์ และเอกสารที่ใช้',
+  title: 'เคสเคลมจริงประกันสุขภาพเด็ก รวม 9 เคส RSV ไข้หวัดใหญ่ มือเท้าปาก | FIN Broker Online',
+  desc: 'รีวิวเคสเคลมจริงประกันเด็ก FIN FOR KIDS PLUS ที่ได้รับการพิจารณาแล้ว 9 เคส — RSV, ไข้หวัดใหญ่, มือเท้าปาก ค่ารักษาสูงสุดกว่า 100,000 บาท พร้อมภาพเอกสารจริงที่ปิดข้อมูลส่วนบุคคล',
   page: 'claims', active: 'claims',
+  ogImage: SITE + '/assets/img/claims/case-6.jpg',
   content: `
 ${breadcrumb([BC_HOME, ['เคสเคลมจริง']])}
 ${pageHero({
-  h1: 'ตัวอย่างเคสเคลมประกันเด็กที่ได้รับการพิจารณาแล้ว',
-  sub: 'ทุกเคสเป็นเหตุการณ์จริง ภาพเอกสารปิดข้อมูลส่วนบุคคลก่อนเผยแพร่ทุกครั้ง',
+  h1: 'รีวิวเคสเคลมจริง ที่ได้รับการพิจารณาแล้ว',
+  sub: 'ทุกเคสเป็นเหตุการณ์จริงจากลูกค้า FIN FOR KIDS PLUS — ภาพเอกสารปิดข้อมูลส่วนบุคคลก่อนเผยแพร่ทุกครั้ง',
+  badges: ['🛡 เคลมไว ไม่ยุ่งยาก', '📄 ค่ารักษาตามเอกสารเคลม', '🤝 ตัวแทนประสานงานให้ทุกขั้นตอน'],
 })}
 
+<section class="stats-band" aria-label="สรุปเคสเคลม">
+  <div class="container">
+    <div class="stats-grid">
+      <div class="stat"><b>9 เคส</b><span>รีวิวเคสเคลมจริงที่เผยแพร่</span></div>
+      <div class="stat"><b>395,000+</b><span>บาท รวมค่ารักษาตามเอกสารเคลมทุกเคส</span></div>
+      <div class="stat"><b>102,571.-</b><span>เคสค่ารักษาสูงสุด (RSV นอน รพ. 2 วัน)</span></div>
+    </div>
+    <p class="stats-note">ผลการพิจารณาแต่ละกรณีแตกต่างกันตามการรักษา เอกสาร ข้อเท็จจริง และเงื่อนไขกรมธรรม์</p>
+  </div>
+</section>
+
 <section class="section"><div class="container">
-  <div class="tabs" role="tablist" aria-label="กรองเคสเคลม">
-    <button class="tab-btn" aria-selected="true">ทั้งหมด</button>
-    <button class="tab-btn" aria-selected="false">IPD</button>
-    <button class="tab-btn" aria-selected="false">OPD</button>
-    <button class="tab-btn" aria-selected="false">อุบัติเหตุ</button>
+  <div class="section-head">
+    <span class="kicker">💼 CLAIM CASES</span>
+    <h2>เลือกดูตามโรค</h2>
+    <p>กดที่ภาพเพื่อขยายดูเอกสารเคลมขนาดเต็ม</p>
   </div>
-
-  <div class="card" style="text-align:center;padding:60px 30px">
-    <div style="font-size:3rem">🗂️</div>
-    <h3>กำลังทยอยเพิ่มเคสเคลมจริง</h3>
-    <p style="max-width:560px;margin:0 auto">ทีมงานกำลังรวบรวมเคสเคลมที่ได้รับการพิจารณาแล้ว และปิดข้อมูลส่วนบุคคลในเอกสารทุกฉบับ (ชื่อผู้เอาประกันภัย ชื่อเด็ก เลขกรมธรรม์ เลขบัตรประชาชน ชื่อเจ้าหน้าที่ เบอร์โทรศัพท์) ก่อนเผยแพร่ — โครงสร้างแต่ละเคสจะประกอบด้วยหัวข้อโรคตามเอกสาร ภาพเอกสาร สรุปลำดับการใช้สิทธิ์ เอกสารที่ใช้ประกอบ และหมายเหตุเงื่อนไขกรมธรรม์</p>
-    <p style="margin-top:14px"><a class="btn btn-line" href="/go/line/?intent=claim-cases" data-line-intent="claim-cases">สอบถามตัวอย่างเคสกับตัวแทน</a></p>
+  <div class="filter-pills" role="group" aria-label="กรองเคสตามโรค">
+    <button class="pill" aria-pressed="true" data-filter="all">📚 ทั้งหมด <span class="cnt">${CLAIM_CASES.length}</span></button>
+    <button class="pill" aria-pressed="false" data-filter="rsv">🫁 RSV <span class="cnt">${CLAIM_CASES.filter(c => c.disease === 'rsv').length}</span></button>
+    <button class="pill" aria-pressed="false" data-filter="flu">🤧 ไข้หวัดใหญ่ <span class="cnt">${CLAIM_CASES.filter(c => c.disease === 'flu').length}</span></button>
+    <button class="pill" aria-pressed="false" data-filter="hfmd">🖐 มือ เท้า ปาก <span class="cnt">${CLAIM_CASES.filter(c => c.disease === 'hfmd').length}</span></button>
   </div>
-
-  <p class="note" style="margin-top:24px">เคสที่เผยแพร่เป็นตัวอย่างจากเหตุการณ์จริง ผลการพิจารณาแต่ละกรณีอาจแตกต่างกันตามรายละเอียดการรักษา เอกสาร ข้อเท็จจริง และเงื่อนไขกรมธรรม์</p>
+  <div class="grid grid-3" id="claim-grid">
+    ${CLAIM_CASES.map(claimCard).join('\n')}
+  </div>
+  <p class="note" style="margin-top:24px">ภาพเอกสารทุกฉบับปิดข้อมูลส่วนบุคคล (ชื่อผู้เอาประกันภัย เลขกรมธรรม์ เบอร์โทรศัพท์) ก่อนเผยแพร่ · เคสที่เผยแพร่เป็นตัวอย่างจากเหตุการณ์จริง ผลการพิจารณาแต่ละกรณีอาจแตกต่างกันตามรายละเอียดการรักษา เอกสาร ข้อเท็จจริง และเงื่อนไขกรมธรรม์</p>
 </div></section>
 
-${ctaBanner('claim-cases', 'อยากรู้ขั้นตอนใช้สิทธิ์ก่อนตัดสินใจ?', 'สอบถามขั้นตอนการใช้สิทธิ์และประสบการณ์การเคลมจริงกับตัวแทนได้ทาง LINE')}
+<svg xmlns="http://www.w3.org/2000/svg" style="display:none" aria-hidden="true"><defs><g id="i-search"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.34-4.34"/></g></defs></svg>
+
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="ภาพขยาย">
+  <button class="lightbox-close" aria-label="ปิดภาพขยาย">✕</button>
+  <img src="" alt="">
+</div>
+
+<script>
+(function(){
+  var grid=document.getElementById('claim-grid');
+  document.querySelectorAll('.pill').forEach(function(btn){
+    btn.addEventListener('click',function(){
+      document.querySelectorAll('.pill').forEach(function(b){b.setAttribute('aria-pressed','false')});
+      btn.setAttribute('aria-pressed','true');
+      var f=btn.getAttribute('data-filter');
+      grid.querySelectorAll('.claim-card').forEach(function(c){
+        c.style.display=(f==='all'||c.getAttribute('data-cat')===f)?'':'none';
+      });
+      if(window.finTrack) finTrack('claim_filter',{disease:f});
+    });
+  });
+})();
+</script>
+
+${ctaBanner('claim-cases', 'อยากให้ลูกได้รับความคุ้มครองแบบเคสเหล่านี้?', 'ส่งอายุลูกให้ตัวแทนช่วยเช็คแผนและเบี้ยได้ทาง LINE — ตัวแทนดูแลตั้งแต่สมัครจนถึงวันเคลม')}
 `,
 },
 

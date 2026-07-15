@@ -394,6 +394,21 @@ table.tbl{width:100%;border-collapse:collapse;background:#fff;min-width:560px}
 .toc a:hover{color:var(--red)}
 .article-body h2{display:flex;gap:12px;align-items:baseline}
 .article-body h2 .no{flex:none;background:var(--red);color:#fff;font-size:.95rem;width:32px;height:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(-3px)}
+/* ---------- เคสเคลมจริง ---------- */
+.claim-card{overflow:hidden}
+.claim-thumb{position:relative;display:block;width:100%;border:0;background:none;padding:0;cursor:zoom-in}
+.claim-thumb img{width:100%;height:auto;display:block;transition:transform .3s ease}
+.claim-card:hover .claim-thumb img{transform:scale(1.03)}
+.claim-thumb .zoom-hint{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;background:rgba(29,27,103,.85);color:#fff;font-size:.75rem;border-radius:999px;padding:6px 14px;white-space:nowrap;opacity:0;transition:opacity .25s ease}
+.claim-card:hover .zoom-hint{opacity:1}
+.claim-thumb .zoom-hint svg{width:13px;height:13px}
+.claim-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.claim-chip{display:inline-flex;align-items:center;gap:4px;background:var(--bg);border:1px solid var(--border);border-radius:999px;padding:4px 12px;font-size:.78rem;color:var(--ink)}
+.claim-chip.chip-disease{background:var(--red-soft);border-color:#F5C2C4;color:var(--red);font-weight:600}
+.claim-chip.chip-amount{background:#EAF7EF;border-color:#BFE5CC;color:#1B7A3D;font-weight:600}
+.claim-card .post-body h3{margin:0 0 6px;font-size:1.05rem}
+.claim-card .post-body p{font-size:.88rem;color:var(--gray);margin:0}
+
 .brochure-table{position:relative;display:block;max-width:860px;margin:0 auto;border:0;background:none;padding:0;cursor:zoom-in;transition:transform .25s ease}
 .brochure-table:hover{transform:scale(1.01)}
 .brochure-table img{width:100%;height:auto;display:block;border-radius:18px;border:6px solid #fff;box-shadow:0 24px 60px rgba(29,27,103,.14),0 4px 14px rgba(29,27,103,.08)}
