@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>กำลังพาไปที่ LINE @finforkids…</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500&display=swap" rel="stylesheet">
+<style>
+body{font-family:'Kanit',sans-serif;background:#F4F5F7;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0}
+.box{text-align:center;background:#fff;border-radius:20px;padding:40px 34px;box-shadow:0 10px 30px rgba(29,27,103,.12);max-width:360px}
+.box .ic{font-size:3rem}
+h1{font-size:1.15rem;color:#1D1B67;margin:12px 0 6px}
+p{color:#6B7080;font-size:.9rem;margin:0 0 18px}
+a{display:inline-block;background:#06C755;color:#fff;text-decoration:none;border-radius:999px;padding:12px 28px;font-weight:500}
+</style>
+</head>
+<body>
+<div class="box">
+  <div class="ic">💬</div>
+  <h1>กำลังพาไปที่ LINE @finforkids</h1>
+  <p>ถ้าหน้าไม่เปลี่ยนใน 3 วินาที กดปุ่มด้านล่างได้เลย</p>
+  <a id="line-link" href="https://line.me/R/ti/p/%40finforkids">เปิด LINE</a>
+</div>
+<script>
+(function () {
+  // เก็บ event intent ก่อน redirect ไป LINE (ส่งเข้า dataLayer ถ้ามี GTM/GA)
+  var intent = new URLSearchParams(location.search).get('intent') || 'unknown';
+  try {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: 'line_click', intent: intent, referrer: document.referrer });
+    var log = JSON.parse(localStorage.getItem('fin_line_intents') || '[]');
+    log.push({ intent: intent, at: new Date().toISOString(), from: document.referrer });
+    localStorage.setItem('fin_line_intents', JSON.stringify(log.slice(-100)));
+  } catch (e) {}
+
+  // ข้อความเริ่มต้นตาม intent — ช่วยตัวแทน/AI Agent แยกประเภทลูกค้าได้ทันที
+  var MESSAGES = {
+    'child-home':        'สนใจประกันสุขภาพเด็ก FIN FOR KIDS PLUS ต้องการให้ช่วยเช็กแผนตามอายุบุตรค่ะ/ครับ',
+    'fin-for-kids-plus': 'สนใจประกันสุขภาพเด็ก FIN FOR KIDS PLUS ต้องการให้ช่วยเช็กแผนตามอายุบุตรค่ะ/ครับ',
+    'plus-1':            'สนใจแผน FIN FOR KIDS PLUS 1 ต้องการสอบถามค่าเบี้ยและเงื่อนไขค่ะ/ครับ',
+    'plus-2':            'สนใจแผน FIN FOR KIDS PLUS 2 ต้องการสอบถามค่าเบี้ยและเงื่อนไขค่ะ/ครับ',
+    'plus-3':            'สนใจแผน FIN FOR KIDS PLUS 3 ต้องการสอบถามค่าเบี้ยและเงื่อนไขค่ะ/ครับ',
+    'premium':           'สนใจ FIN FOR KIDS PLUS ต้องการสอบถามค่าเบี้ยและการผ่อนชำระค่ะ/ครับ',
+    'claim-guide':       'สนใจสอบถามขั้นตอนการใช้สิทธิ์ประกันสุขภาพเด็กค่ะ/ครับ',
+    'claim-cases':       'สนใจสอบถามขั้นตอนการใช้สิทธิ์ประกันสุขภาพเด็กค่ะ/ครับ'
+  };
+  // LINE OA add-friend URL (เปลี่ยนเป็นลิงก์ lin.ee ของบัญชีจริงได้)
+  var url = 'https://line.me/R/oaMessage/%40finforkids/';
+  var msg = MESSAGES[intent];
+  var target = msg ? url + '?' + encodeURIComponent(msg) : 'https://line.me/R/ti/p/%40finforkids';
+  document.getElementById('line-link').href = target;
+  setTimeout(function () { location.replace(target); }, 400);
+})();
+</script>
+</body>
+</html>

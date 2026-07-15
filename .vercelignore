@@ -1,0 +1,7 @@
+# ไม่ต้องอัปโหลดไฟล์ source/เอกสารขึ้น hosting (ยังอยู่ใน git ตามปกติ)
+site-src
+build.mjs
+README.md
+SEO-SETUP.md
+.gitattributes
+.vercelignore
