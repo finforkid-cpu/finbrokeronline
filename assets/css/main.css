@@ -394,6 +394,11 @@ table.tbl{width:100%;border-collapse:collapse;background:#fff;min-width:560px}
 .toc a:hover{color:var(--red)}
 .article-body h2{display:flex;gap:12px;align-items:baseline}
 .article-body h2 .no{flex:none;background:var(--red);color:#fff;font-size:.95rem;width:32px;height:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(-3px)}
+.brochure-table{position:relative;display:block;max-width:860px;margin:0 auto;border:0;background:none;padding:0;cursor:zoom-in;transition:transform .25s ease}
+.brochure-table:hover{transform:scale(1.01)}
+.brochure-table img{width:100%;height:auto;display:block;border-radius:18px;border:6px solid #fff;box-shadow:0 24px 60px rgba(29,27,103,.14),0 4px 14px rgba(29,27,103,.08)}
+.brochure-table .zoom-hint{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:inline-flex;align-items:center;gap:6px;background:rgba(29,27,103,.85);color:#fff;font-size:.8rem;border-radius:999px;padding:7px 16px;white-space:nowrap}
+.brochure-table .zoom-hint svg{width:14px;height:14px}
 .art-photo{margin:26px 0}
 .art-photo img{width:100%;height:auto;display:block;border-radius:var(--radius-sm);box-shadow:0 6px 22px rgba(29,27,103,.12)}
 .art-cover-photo{margin:-64px 0 26px}
