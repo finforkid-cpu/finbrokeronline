@@ -71,7 +71,7 @@ ${btns ? `<div class="hero-btns">${btns}</div>` : ''}
 </div></section>`;
 }
 
-export function layout({ title, desc, path, page, active, content, ldjson = [], ogImage, ogType = 'website', published, modified }) {
+export function layout({ title, desc, path, page, active, content, ldjson = [], ogImage, ogType = 'website', published, modified, noindex = false }) {
   const og = ogImage || `${SITE}/assets/img/FFKP001.jpg`;
   const nav = NAV.map(([href, label, key]) =>
     `<a href="${href}"${key === active ? ' aria-current="page"' : ''}>${label}</a>`).join('\n      ');
@@ -88,7 +88,7 @@ export function layout({ title, desc, path, page, active, content, ldjson = [], 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${title}</title>
 <meta name="description" content="${desc}">
-<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">${gsc}
+<meta name="robots" content="${noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1'}">${gsc}
 <link rel="canonical" href="${SITE}${path}">
 <meta property="og:type" content="${ogType}">
 <meta property="og:site_name" content="FIN Broker Online">
@@ -164,7 +164,7 @@ ${content}
         <ul>
           <li><a href="/go/line/?intent=footer" data-line-intent="footer">LINE: @finforkids</a></li>
           <li><a href="https://www.facebook.com/finforkid" rel="noopener" target="_blank">Facebook: ฟินประกันเด็ก</a></li>
-          <li><a href="https://www.tiktok.com/" rel="noopener" target="_blank">TikTok: ฟินประกันเด็ก</a></li>
+          <li><a href="https://m.me/finforkid" rel="noopener" target="_blank">Messenger: Fin For Kids</a></li>
           <li><a href="/complaints/">ช่องทางร้องเรียน</a></li>
         </ul>
       </div>

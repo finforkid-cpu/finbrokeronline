@@ -66,8 +66,8 @@ ${breadcrumb([BC_HOME, ['บทความ']])}
   <div class="container">
     <div class="section-head">
       <span class="kicker">📖 ARTICLES</span>
-      <h2>เลือกอ่านตามหมวดหมู่</h2>
-      <p>รวมความรู้โรคฮิตในเด็ก การดูแล ป้องกัน และความรู้ประกันสุขภาพเด็ก — คัดและตรวจสอบโดยทีมงาน</p>
+      <h1 style="font-size:clamp(1.45rem,3.4vw,2.1rem)">บทความความรู้ประกันสุขภาพเด็ก และโรคฮิตในเด็ก</h1>
+      <p>รวมความรู้โรคฮิตในเด็ก การดูแล ป้องกัน และความรู้ประกันสุขภาพเด็ก — คัดและตรวจสอบโดยทีมงาน เลือกอ่านตามหมวดหมู่ได้เลย</p>
     </div>
     <div class="filter-pills" role="group" aria-label="กรองบทความตามหมวด">${pills}</div>
     <div class="grid grid-3" id="article-grid">
