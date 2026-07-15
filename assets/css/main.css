@@ -404,6 +404,17 @@ table.tbl{width:100%;border-collapse:collapse;background:#fff;min-width:560px}
 .toc a:hover{color:var(--red)}
 .article-body h2{display:flex;gap:12px;align-items:baseline}
 .article-body h2 .no{flex:none;background:var(--red);color:#fff;font-size:.95rem;width:32px;height:32px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;transform:translateY(-3px)}
+/* ---------- ปุ่มแชทลอย (LINE + Messenger) ---------- */
+.float-chat{position:fixed;right:20px;bottom:24px;z-index:1001;display:flex;flex-direction:column;gap:12px;align-items:center}
+.float-btn{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .2s ease,box-shadow .2s ease;text-decoration:none}
+.float-btn:hover{transform:translateY(-3px) scale(1.07);box-shadow:0 12px 30px rgba(0,0,0,.3)}
+.float-btn svg{width:30px;height:30px;fill:#fff;display:block}
+.float-msgr{background:#0084FF}
+.float-line{background:#06C755;animation:floatPulse 2.4s ease-out infinite}
+@keyframes floatPulse{0%{box-shadow:0 8px 24px rgba(0,0,0,.25),0 0 0 0 rgba(6,199,85,.45)}70%{box-shadow:0 8px 24px rgba(0,0,0,.25),0 0 0 16px rgba(6,199,85,0)}100%{box-shadow:0 8px 24px rgba(0,0,0,.25),0 0 0 0 rgba(6,199,85,0)}}
+@media(max-width:760px){.float-chat{right:14px;bottom:86px}.float-btn{width:50px;height:50px}.float-btn svg{width:27px;height:27px}}
+@media(prefers-reduced-motion:reduce){.float-line{animation:none}}
+
 /* ---------- ภาพใบอนุญาต (หน้า /license/) ---------- */
 .cert-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:18px 0 30px}
 @media(max-width:680px){.cert-grid{grid-template-columns:1fr}}
